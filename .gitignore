@@ -1,0 +1,8 @@
+.DS_Store
+
+# Koka build outputs / caches
+.koka/
+
+# Local scratch / temporary files
+tmp/
+
