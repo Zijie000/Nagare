@@ -2,12 +2,12 @@
 
 ## Abstract
 
-<table>
+<table border="0" style="border-collapse: collapse; border: 0;">
   <tr>
-    <td>
+    <td style="border: 0;">
       Nagare is a compositional, effectful, and resource-safe streaming abstraction for the Koka programming language, designed to model structured, long-lived computations over time. The name "Nagare" (流れ) is derived from the Japanese word for “Stream”, chosen in harmony with Koka’s naming (効果, meaning “effect”), to reflect the continuous flow of effectful processes.
     </td>
-    <td width="34%">
+    <td width="32%" style="border: 0;">
       <img src="docs/image/img1.png" alt="Nagare" width="90%" />
     </td>
   </tr>
