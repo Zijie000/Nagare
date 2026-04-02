@@ -14,10 +14,12 @@ pub type nstream<a>
 
 pub alias pipe<a,b> = nstream<a> -> nstream<b>
 
+// Unwrap a stream into its underlying pull program.
 pub fun toPull<a>(source : nstream<a>) : pull<a>
   match source
     Stream(step) -> step
 
+// Wrap a pull program back into a user-facing stream.
 pub fun fromPull<a>(step : pull<a>) : nstream<a>
   Stream(step)
 

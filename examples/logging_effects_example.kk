@@ -26,12 +26,12 @@ fun showTraceEvent(ev : trace-event<int>) : string
     TraceEmit(x) -> "emit(" ++ show(x) ++ ")"
 
 fun main() : io ()
-  val source = concat([
+  val mockSource = concat([
     emits([40, 41]),
     evals([fn() sourceValue(1), fn() sourceValue(2), fn() sourceValue(3)]),
     emits([42])
   ])
-  val transformed = source.through(transform)
+  val transformed = mockSource.through(transform)
 
   println("== compile interpreter: compile.toList() ==")
   val out = transformed.compile.toList()
