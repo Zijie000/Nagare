@@ -8,6 +8,78 @@ fun listAppend<a>(xs : list<a>, ys : list<a>) : list<a>
     []            -> ys
     Cons(x, xt)   -> Cons(x, listAppend(xt, ys))
 
+// Length of a list.
+fun listLength<a>(xs : list<a>) : int
+  match xs
+    []            -> 0
+    Cons(_, xt)   -> 1 + listLength(xt)
+
+// Keep first n elements from a list.
+fun listTakeN<a>(xs : list<a>, n : int) : list<a>
+  if n <= 0 then []
+  else
+    match xs
+      []            -> []
+      Cons(x, xt)   -> Cons(x, listTakeN(xt, n - 1))
+
+// Drop first n elements from a list.
+fun listDropN<a>(xs : list<a>, n : int) : list<a>
+  if n <= 0 then xs
+  else
+    match xs
+      []            -> []
+      Cons(_, xt)   -> listDropN(xt, n - 1)
+
+// Keep longest prefix while predicate holds.
+fun listTakeWhile<a>(xs : list<a>, pred : a -> bool) : list<a>
+  match xs
+    []            -> []
+    Cons(x, xt)   ->
+      if pred(x) then Cons(x, listTakeWhile(xt, pred))
+      else []
+
+// Drop longest prefix while predicate holds.
+fun listDropWhile<a>(xs : list<a>, pred : a -> bool) : list<a>
+  match xs
+    []            -> []
+    Cons(x, xt)   ->
+      if pred(x) then listDropWhile(xt, pred)
+      else xs
+
+// Reverse a list.
+fun listReverse<a>(xs : list<a>) : list<a>
+  fun go(rest : list<a>, acc : list<a>) : list<a>
+    match rest
+      []            -> acc
+      Cons(x, xt)   -> go(xt, Cons(x, acc))
+  go(xs, [])
+
+// Flatten a list of chunks into one list of values.
+fun flattenChunks<a>(chunks : list<chunk<a>>) : list<a>
+  match chunks
+    [] -> []
+    Cons(ch, ct) ->
+      match ch
+        Chunk(values) -> listAppend(values, flattenChunks(ct))
+
+// Split a list into chunks of size n (last chunk may be smaller).
+fun listChunkN<a>(values : list<a>, n : int) : list<chunk<a>>
+  fun go(rest : list<a>, curRev : list<a>, curLen : int, chunksRev : list<chunk<a>>) : list<chunk<a>>
+    match rest
+      [] ->
+        match curRev
+          [] -> listReverse(chunksRev)
+          _  -> listReverse(Cons(Chunk(listReverse(curRev)), chunksRev))
+      Cons(x, xt) ->
+        val nextRev = Cons(x, curRev)
+        val nextLen = curLen + 1
+        if nextLen >= n then
+          go(xt, [], 0, Cons(Chunk(listReverse(nextRev)), chunksRev))
+        else
+          go(xt, nextRev, nextLen, chunksRev)
+  if n <= 0 then []
+  else go(values, [], 0, [])
+
 // Map over all elements in a chunk.
 fun chunkMap<a,b>(c : chunk<a>, f : a -> b) : chunk<b>
   match c
@@ -64,4 +136,97 @@ pub fun pullFlatMap<a,b>(source : pull<a>, f : a -> pull<b>) : pull<b>
       PEval(fn() pullFlatMap(next(), f))
     PAcquire(acquire, release, tail) ->
       PAcquire(acquire, release, pullFlatMap(tail, f))
+
+// Keep only first n outputs from a pull.
+pub fun pullTake<a>(source : pull<a>, n : int) : pull<a>
+  if n <= 0 then PDone
+  else
+    match source
+      PDone ->
+        PDone
+      POutput(out, tail) ->
+        match out
+          Chunk(values) ->
+            val len = listLength(values)
+            if len <= n then POutput(Chunk(values), pullTake(tail, n - len))
+            else POutput(Chunk(listTakeN(values, n)), PDone)
+      PEval(next) ->
+        PEval(fn() pullTake(next(), n))
+      PAcquire(acquire, release, tail) ->
+        PAcquire(acquire, release, pullTake(tail, n))
+
+// Drop first n outputs from a pull.
+pub fun pullDrop<a>(source : pull<a>, n : int) : pull<a>
+  if n <= 0 then source
+  else
+    match source
+      PDone ->
+        PDone
+      POutput(out, tail) ->
+        match out
+          Chunk(values) ->
+            val len = listLength(values)
+            if n >= len then pullDrop(tail, n - len)
+            else POutput(Chunk(listDropN(values, n)), tail)
+      PEval(next) ->
+        PEval(fn() pullDrop(next(), n))
+      PAcquire(acquire, release, tail) ->
+        PAcquire(acquire, release, pullDrop(tail, n))
+
+// Keep longest prefix satisfying pred; stop at first failure.
+pub fun pullTakeWhile<a>(source : pull<a>, pred : a -> bool) : pull<a>
+  match source
+    PDone ->
+      PDone
+    POutput(out, tail) ->
+      match out
+        Chunk(values) ->
+          val kept = listTakeWhile(values, pred)
+          val rest = listDropWhile(values, pred)
+          match kept
+            [] -> PDone
+            _  ->
+              match rest
+                [] -> POutput(Chunk(kept), pullTakeWhile(tail, pred))
+                _  -> POutput(Chunk(kept), PDone)
+    PEval(next) ->
+      PEval(fn() pullTakeWhile(next(), pred))
+    PAcquire(acquire, release, tail) ->
+      PAcquire(acquire, release, pullTakeWhile(tail, pred))
+
+// Re-chunk a pull into fixed-size chunks (last chunk may be smaller).
+pub fun pullChunkN<a>(source : pull<a>, n : int) : pull<chunk<a>>
+  if n <= 0 then PDone
+  else
+    match source
+      PDone ->
+        PDone
+      POutput(out, tail) ->
+        match out
+          Chunk(values) ->
+            val chunks = listChunkN(values, n)
+            match chunks
+              [] -> pullChunkN(tail, n)
+              _  -> POutput(Chunk(chunks), pullChunkN(tail, n))
+      PEval(next) ->
+        PEval(fn() pullChunkN(next(), n))
+      PAcquire(acquire, release, tail) ->
+        PAcquire(acquire, release, pullChunkN(tail, n))
+
+// Flatten a pull of chunks back into a pull of values.
+pub fun pullUnchunks<a>(source : pull<chunk<a>>) : pull<a>
+  match source
+    PDone ->
+      PDone
+    POutput(out, tail) ->
+      match out
+        Chunk(chunks) ->
+          val flat = flattenChunks(chunks)
+          match flat
+            [] -> pullUnchunks(tail)
+            _  -> POutput(Chunk(flat), pullUnchunks(tail))
+    PEval(next) ->
+      PEval(fn() pullUnchunks(next()))
+    PAcquire(acquire, release, tail) ->
+      PAcquire(acquire, release, pullUnchunks(tail))
 

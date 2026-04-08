@@ -4,20 +4,22 @@ import nagare/core/types
 import nagare/core/stream
 import nagare/interpreter
 
-fun sourceValue(n : int) : io int
-  println("[eval] producing " ++ show(n))
-  n
+fun enrichWithLog(x : int)
+  println("[effectful step] enrich " ++ show(x))
+  x + 100
 
 fun expand(x : int)
-  eval(fn()
-    println("[flatMap] expanding " ++ show(x))
-    x * 10
-  )
+  x * 5
 
+fun tapExpanded(x : int)
+  println("[evalTap] observed " ++ show(x))
+
+// Core combinator showcase: chaining evalMap, evalTap, map, and filter.
 fun transform(source : nstream<int>) : nstream<int>
   source
-    .map(fn(x) x + 100)
-    .flatMap(expand)
+    .evalMap(enrichWithLog)
+    .evalTap(tapExpanded)
+    .map(expand)
     .filter(fn(x) (x % 2) == 0)
 
 fun showTraceEvent(ev : trace-event<int>) : string
@@ -26,11 +28,8 @@ fun showTraceEvent(ev : trace-event<int>) : string
     TraceEmit(x) -> "emit(" ++ show(x) ++ ")"
 
 fun main() : io ()
-  val mockSource = concat([
-    emits([40, 41]),
-    evals([fn() sourceValue(1), fn() sourceValue(2), fn() sourceValue(3)]),
-    emits([42])
-  ])
+  // Pure source values only; effects are expressed in transform steps.
+  val mockSource = emits([40, 41, 1, 2, 3, 42, 43, 44, 45, 46, 47, 48])
   val transformed = mockSource.through(transform)
 
   println("== compile interpreter: compile.toList() ==")
@@ -41,6 +40,7 @@ fun main() : io ()
   val lastVal = transformed.compile.last()
   println("[last] " ++ show(lastVal))
 
+  // compile.trace() is for debugging this example only; it has no other role here.
   println("== compile interpreter: compile.trace() ==")
   val traceRun = transformed.compile.trace()
   match traceRun

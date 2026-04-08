@@ -65,6 +65,46 @@ pub fun map<a,b>(source : nstream<a>, f : a -> b) : nstream<b>
   match source
     Stream(step) -> Stream(pullMap(step, f))
 
+// Transform each emitted value with an effectful function.
+pub fun evalMap<a,b>(source : nstream<a>, f : a -> io b) : nstream<b>
+  flatMap(source, fn(x)
+    eval(fn() f(x))
+  )
+
+// Run an effect for each emitted value, preserving the original value.
+pub fun evalTap<a>(source : nstream<a>, f : a -> io ()) : nstream<a>
+  flatMap(source, fn(x)
+    eval(fn()
+      f(x)
+      x
+    )
+  )
+
+// Keep only the first n emitted values.
+pub fun take<a>(source : nstream<a>, n : int) : nstream<a>
+  match source
+    Stream(step) -> Stream(pullTake(step, n))
+
+// Drop the first n emitted values.
+pub fun drop<a>(source : nstream<a>, n : int) : nstream<a>
+  match source
+    Stream(step) -> Stream(pullDrop(step, n))
+
+// Keep values while predicate holds; stop at first failure.
+pub fun takeWhile<a>(source : nstream<a>, pred : a -> bool) : nstream<a>
+  match source
+    Stream(step) -> Stream(pullTakeWhile(step, pred))
+
+// Re-chunk the stream into fixed-size chunks.
+pub fun chunkN<a>(source : nstream<a>, n : int) : nstream<chunk<a>>
+  match source
+    Stream(step) -> Stream(pullChunkN(step, n))
+
+// Flatten a stream of chunks back into a stream of values.
+pub fun unchunks<a>(source : nstream<chunk<a>>) : nstream<a>
+  match source
+    Stream(step) -> Stream(pullUnchunks(step))
+
 // Keep only values that satisfy a predicate.
 pub fun filter<a>(source : nstream<a>, pred : a -> bool) : nstream<a>
   match source
