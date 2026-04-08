@@ -10,6 +10,31 @@ This project is inspired by Typelevel’s FS2, which is built on Cats Effect; si
 
 ## Quick start 🐣
 
-Run the example:
+> [!NOTE]
+> **Early stage.** This project is still in its initial phase and under active development—APIs, structure, and behavior may change without notice.
+
+### Run the example
 
 - `koka -e --builddir=.koka -isrc examples/logging_effects_example.kk`
+
+### Installing Koka
+
+You need the [Koka](https://koka-lang.github.io/koka/) compiler. Official **binary installers** cover **Windows (x64)**, **macOS (x64 and Apple Silicon)**, and **Linux (x64)**; see **Section 1.1 — Installing the compiler** in the [Koka language book](https://koka-lang.github.io/koka/doc/book.html).
+
+**macOS / Linux**:
+
+```sh
+curl -sSL https://github.com/koka-lang/koka/releases/latest/download/install.sh | sh
+```
+
+**Windows** (Command Prompt):
+
+```bat
+curl -sSL -o %tmp%\install-koka.bat https://github.com/koka-lang/koka/releases/latest/download/install.bat && %tmp%\install-koka.bat
+```
+
+On other platforms, build **from source** as described in the [Koka repository](https://github.com/koka-lang/koka#build-from-source).
+
+The [Koka VS Code extension](https://marketplace.visualstudio.com/items?itemName=koka.language-koka) can also download and install the latest compiler for you (see the book for the walkthrough).
+
+Verify: `koka --version`.
