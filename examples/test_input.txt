@@ -1,0 +1,7 @@
+Hello World
+This is line 2
+ERROR: something went wrong
+Line 4 is normal
+ERROR: another issue found
+The quick brown fox
+jumps over the lazy dog

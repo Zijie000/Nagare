@@ -91,7 +91,7 @@ fun chunkFilter<a>(c : chunk<a>, pred : a -> bool) : chunk<a>
     Chunk(values) -> Chunk(values.filter(pred))
 
 // Sequence two pulls, evaluating the right pull only when the left is done.
-pub fun pullAppend<a>(left : pull<a>, right : () -> pull<a>) : pull<a>
+pub fun pullAppend<a,e>(left : pull<a,e>, right : () -> pull<a,e>) : pull<a,e>
   match left
     PDone                -> right()
     POutput(out, tail)   -> POutput(out, pullAppend(tail, right))
@@ -100,7 +100,7 @@ pub fun pullAppend<a>(left : pull<a>, right : () -> pull<a>) : pull<a>
       PAcquire(acquire, release, pullAppend(tail, right))
 
 // Map a function over all outputs of a pull (preserves eval/acquire structure).
-pub fun pullMap<a,b>(source : pull<a>, f : a -> b) : pull<b>
+pub fun pullMap<a,b,e>(source : pull<a,e>, f : a -> b) : pull<b,e>
   match source
     PDone                -> PDone
     POutput(out, tail)   -> POutput(chunkMap(out, f), pullMap(tail, f))
@@ -109,7 +109,7 @@ pub fun pullMap<a,b>(source : pull<a>, f : a -> b) : pull<b>
       PAcquire(acquire, release, pullMap(tail, f))
 
 // Filter outputs of a pull (preserves eval/acquire structure).
-pub fun pullFilter<a>(source : pull<a>, pred : a -> bool) : pull<a>
+pub fun pullFilter<a,e>(source : pull<a,e>, pred : a -> bool) : pull<a,e>
   match source
     PDone                -> PDone
     POutput(out, tail)   -> POutput(chunkFilter(out, pred), pullFilter(tail, pred))
@@ -118,13 +118,13 @@ pub fun pullFilter<a>(source : pull<a>, pred : a -> bool) : pull<a>
       PAcquire(acquire, release, pullFilter(tail, pred))
 
 // FlatMap a list of values into pulls and concatenate results.
-fun flatMapChunk<a,b>(values : list<a>, f : a -> pull<b>) : pull<b>
+fun flatMapChunk<a,b,e>(values : list<a>, f : a -> pull<b,e>) : pull<b,e>
   match values
     []            -> PDone
     Cons(x, xt)   -> pullAppend(f(x), fn() flatMapChunk(xt, f))
 
 // FlatMap a pull by expanding each emitted value into a pull and concatenating.
-pub fun pullFlatMap<a,b>(source : pull<a>, f : a -> pull<b>) : pull<b>
+pub fun pullFlatMap<a,b,e>(source : pull<a,e>, f : a -> pull<b,e>) : pull<b,e>
   match source
     PDone ->
       PDone
@@ -138,7 +138,7 @@ pub fun pullFlatMap<a,b>(source : pull<a>, f : a -> pull<b>) : pull<b>
       PAcquire(acquire, release, pullFlatMap(tail, f))
 
 // Keep only first n outputs from a pull.
-pub fun pullTake<a>(source : pull<a>, n : int) : pull<a>
+pub fun pullTake<a,e>(source : pull<a,e>, n : int) : pull<a,e>
   if n <= 0 then PDone
   else
     match source
@@ -156,7 +156,7 @@ pub fun pullTake<a>(source : pull<a>, n : int) : pull<a>
         PAcquire(acquire, release, pullTake(tail, n))
 
 // Drop first n outputs from a pull.
-pub fun pullDrop<a>(source : pull<a>, n : int) : pull<a>
+pub fun pullDrop<a,e>(source : pull<a,e>, n : int) : pull<a,e>
   if n <= 0 then source
   else
     match source
@@ -174,7 +174,7 @@ pub fun pullDrop<a>(source : pull<a>, n : int) : pull<a>
         PAcquire(acquire, release, pullDrop(tail, n))
 
 // Keep longest prefix satisfying pred; stop at first failure.
-pub fun pullTakeWhile<a>(source : pull<a>, pred : a -> bool) : pull<a>
+pub fun pullTakeWhile<a,e>(source : pull<a,e>, pred : a -> bool) : pull<a,e>
   match source
     PDone ->
       PDone
@@ -195,7 +195,7 @@ pub fun pullTakeWhile<a>(source : pull<a>, pred : a -> bool) : pull<a>
       PAcquire(acquire, release, pullTakeWhile(tail, pred))
 
 // Re-chunk a pull into fixed-size chunks (last chunk may be smaller).
-pub fun pullChunkN<a>(source : pull<a>, n : int) : pull<chunk<a>>
+pub fun pullChunkN<a,e>(source : pull<a,e>, n : int) : pull<chunk<a>,e>
   if n <= 0 then PDone
   else
     match source
@@ -214,7 +214,7 @@ pub fun pullChunkN<a>(source : pull<a>, n : int) : pull<chunk<a>>
         PAcquire(acquire, release, pullChunkN(tail, n))
 
 // Flatten a pull of chunks back into a pull of values.
-pub fun pullUnchunks<a>(source : pull<chunk<a>>) : pull<a>
+pub fun pullUnchunks<a,e>(source : pull<chunk<a>,e>) : pull<a,e>
   match source
     PDone ->
       PDone

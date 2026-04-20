@@ -1,0 +1,7 @@
+{
+  "koka.languageServer.compilerArguments": [
+    "-isrc",
+    "-itests",
+    "--builddir=.koka"
+  ]
+}

@@ -2,7 +2,7 @@ module logging_effects_example
 
 import nagare/core/types
 import nagare/core/stream
-import nagare/interpreter
+import nagare/core/interpreter
 
 fun enrichWithLog(x : int)
   println("[effectful step] enrich " ++ show(x))
@@ -15,7 +15,7 @@ fun tapExpanded(x : int)
   println("[evalTap] observed " ++ show(x))
 
 // Core combinator showcase: chaining evalMap, evalTap, map, and filter.
-fun transform(source : nstream<int>) : nstream<int>
+fun transform(source : iostream<int>) : iostream<int>
   source
     .evalMap(enrichWithLog)
     .evalTap(tapExpanded)

@@ -1,8 +1,11 @@
-.DS_Store
+**/.DS_Store
 
 # Koka build outputs / caches
 .koka/
 
 # Local scratch / temporary files
 tmp/
+
+# Claude Code
+.claude/
 
