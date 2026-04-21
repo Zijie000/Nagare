@@ -82,12 +82,28 @@ fun readAllChunks(h : read-handle, chunkSize : int, acc : list<string>) : <fileI
 
 // Read a file as a stream of lines (splits on newline boundaries).
 pub fun readLines(filepath : path, chunkSize : int = 4096) : fileStream<string>
-  readAll(filepath, chunkSize).through(splitLines)
+  readAllStreaming(filepath, chunkSize).through(splitLines)
 
 // Split a stream of string chunks into a stream of lines.
 pub fun splitLines<e>(source : nstream<string,e>) : nstream<string,e>
   match source
     Stream(step) -> Stream(splitLinesPull(step, ""))
+
+// Read a file as a truly lazy stream of chunks: the handle is opened once,
+// held by PAcquire for its lifetime, and closed by the interpreter when the
+// stream finishes or is truncated by take/takeWhile. Only one chunk lives in
+// memory at a time — this is the streaming-safe alternative to readAll.
+pub fun readAllStreaming(filepath : path, chunkSize : int = 4096) : fileStream<string>
+  // A ref lets the three lambdas (acquire, release, tail) share the handle
+  // without it escaping the PAcquire bracket.
+  Stream(PEval(fn()
+    val hRef : ref<global, maybe<read-handle>> = ref(Nothing)
+    PAcquire(
+      fn() { hRef := Just(openRead(filepath.string)) },
+      fn() { match !hRef { Just(h) -> closeRead(h); Nothing -> () } },
+      PEval(fn() { match !hRef { Just(h) -> readPull(h, chunkSize); Nothing -> PDone } })
+    )
+  ))
 
 // Read entire file content as a single string element.
 pub fun readUtf8(filepath : path) : fileStream<string>
