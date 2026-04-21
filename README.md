@@ -23,7 +23,17 @@ FS2 encodes effects through a type parameter `F[_]` and relies on Cats Effect’
 > [!NOTE]
 > **Early stage.** This project is still in its initial phase and under active development—APIs, structure, and behavior may change without notice.
 
-### Run the example
+### Run the examples
+
+Row polymorphism, `streamOf` DSL, and resource safety in one place:
+
+`koka -e --builddir=.koka -isrc examples/row_polymorphism_example.kk`
+
+File IO (read / write / copy / listDir):
+
+`koka -e --builddir=.koka -isrc examples/file_io_example.kk`
+
+Combinator chains (`evalMap`, `evalTap`, `trace`):
 
 `koka -e --builddir=.koka -isrc examples/logging_effects_example.kk`
 
