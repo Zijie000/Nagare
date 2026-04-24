@@ -13,29 +13,24 @@ extern null-fd() : intptr_t
 
 // Mock that simulates a file with fixed chunks. openRead/closeRead events are
 // recorded in `log`; readChunk cycles through `chunks` then returns "".
+// Installs three capability handlers to cover the full `<fileIO|io>` alias.
 fun mockReadFileIO(
   log   : ref<global, list<string>>,
   chunks : ref<global, list<string>>,
-  action : () -> <fileIO|io> a
+  action : () -> <fileRead|io> a
 ) : io a
   with handler
     fun openRead(_p)
       log := Cons("open", !log)
       ReadHandle(null-fd())
-    fun openWrite(_p)  WriteHandle(null-fd())
     fun closeRead(_h)
       log := Cons("close", !log)
-    fun closeWrite(_h) ()
     fun readChunk(_h, _size)
       match !chunks
         []           -> ""
         Cons(c, rest) ->
           chunks := rest
           c
-    fun writeChunk(_h, _content) 0
-    fun fileExistsOp(_p)  False
-    fun removeFileOp(_p)  ()
-    fun listChildren(_p, _r, _d) []
     fun readTextFileOp(_p) ""
   action()
 

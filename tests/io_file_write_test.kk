@@ -12,27 +12,22 @@ extern null-fd() : intptr_t
   c inline "0"
 
 // Mock fileIO handler: writes go into `buf`, open/close events into `log`.
+// Installs three capability handlers (fileRead / fileWrite / fileSystem) so
+// the combined `<fileIO|io>` action type-checks.
 fun mockFileIO(
   buf : ref<global, list<string>>,
   log : ref<global, list<string>>,
-  action : () -> <fileIO|io> a
+  action : () -> <fileWrite|io> a
 ) : io a
   with handler
-    fun openRead(_p)   ReadHandle(null-fd())
     fun openWrite(_p)
       log := Cons("open", !log)
       WriteHandle(null-fd())
-    fun closeRead(_h)  ()
     fun closeWrite(_h)
       log := Cons("close", !log)
-    fun readChunk(_h, _size) ""
     fun writeChunk(_h, content)
       buf := Cons(content, !buf)
       content.count
-    fun fileExistsOp(_p) False
-    fun removeFileOp(_p) ()
-    fun listChildren(_p, _r, _d) []
-    fun readTextFileOp(_p) ""
   action()
 
 pub fun suiteBody() : <test-ctx,io> ()

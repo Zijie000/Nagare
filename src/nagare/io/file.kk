@@ -19,7 +19,7 @@ import nagare/io/file_effect
 // ---------------------------------------------------------------------------
 
 // Loop reading chunks from an open read-handle until EOF.
-fun readPull(h : read-handle, chunkSize : int) : div pull<string, <fileIO|io>>
+fun readPull(h : read-handle, chunkSize : int) : div pull<string, <fileRead|io>>
   PEval(fn()
     val chunk = readChunk(h, chunkSize)
     if chunk.is-empty then PDone
@@ -62,7 +62,7 @@ fun splitLinesPull<e>(source : pull<string,e>, buffer : string) : pull<string,e>
 
 // Read a file as a stream of string chunks.
 // `with-read-file` owns open+close; `readChunk` operates on the open handle.
-pub fun readAll(filepath : path, chunkSize : int = 4096) : fileStream<string>
+pub fun readAll(filepath : path, chunkSize : int = 4096) : readStream<string>
   Stream(PEval(fn()
     with-read-file(filepath.string, fn(h)
       // Drain the handle eagerly into a single chunk pull. This is the simplest
@@ -75,13 +75,13 @@ pub fun readAll(filepath : path, chunkSize : int = 4096) : fileStream<string>
   ))
 
 // Helper: drain the read-handle into a list of chunks.
-fun readAllChunks(h : read-handle, chunkSize : int, acc : list<string>) : <fileIO|io> list<string>
+fun readAllChunks(h : read-handle, chunkSize : int, acc : list<string>) : <fileRead|io> list<string>
   val chunk = readChunk(h, chunkSize)
   if chunk.is-empty then acc.reverse
   else readAllChunks(h, chunkSize, Cons(chunk, acc))
 
 // Read a file as a stream of lines (splits on newline boundaries).
-pub fun readLines(filepath : path, chunkSize : int = 4096) : fileStream<string>
+pub fun readLines(filepath : path, chunkSize : int = 4096) : readStream<string>
   readAllStreaming(filepath, chunkSize).through(splitLines)
 
 // Split a stream of string chunks into a stream of lines.
@@ -93,7 +93,7 @@ pub fun splitLines<e>(source : nstream<string,e>) : nstream<string,e>
 // held by PAcquire for its lifetime, and closed by the interpreter when the
 // stream finishes or is truncated by take/takeWhile. Only one chunk lives in
 // memory at a time — this is the streaming-safe alternative to readAll.
-pub fun readAllStreaming(filepath : path, chunkSize : int = 4096) : fileStream<string>
+pub fun readAllStreaming(filepath : path, chunkSize : int = 4096) : readStream<string>
   // A ref lets the three lambdas (acquire, release, tail) share the handle
   // without it escaping the PAcquire bracket.
   Stream(PEval(fn()
@@ -106,7 +106,7 @@ pub fun readAllStreaming(filepath : path, chunkSize : int = 4096) : fileStream<s
   ))
 
 // Read entire file content as a single string element.
-pub fun readUtf8(filepath : path) : fileStream<string>
+pub fun readUtf8(filepath : path) : readStream<string>
   eval(fn() readTextFileOp(filepath.string))
 
 // ---------------------------------------------------------------------------
@@ -114,7 +114,7 @@ pub fun readUtf8(filepath : path) : fileStream<string>
 // ---------------------------------------------------------------------------
 
 // Write a stream of string chunks to a file.
-pub fun writeAll(filepath : path) : filePipe<string, ()>
+pub fun writeAll(filepath : path) : writePipe<string, ()>
   fn(source)
     Stream(PEval(fn()
       with-write-file(filepath.string, fn(h)
@@ -126,7 +126,7 @@ pub fun writeAll(filepath : path) : filePipe<string, ()>
 // Drain the source pull, writing every emitted string to the handle.
 // We let the outer runtime handle PAcquire bookkeeping when possible; here
 // we simply run acquire/release inline around the recursive call.
-fun writeAllChunks(source : pull<string, <fileIO|io>>, h : write-handle) : <fileIO|io> ()
+fun writeAllChunks(source : pull<string, <fileWrite|io>>, h : write-handle) : <fileWrite|io> ()
   match source
     PDone -> ()
     POutput(out, tail) ->
@@ -141,33 +141,33 @@ fun writeAllChunks(source : pull<string, <fileIO|io>>, h : write-handle) : <file
       finally(release, { writeAllChunks(tail, h) })
 
 // Write a stream of strings as lines (appends newline to each element).
-pub fun writeLines(filepath : path) : filePipe<string, ()>
+pub fun writeLines(filepath : path) : writePipe<string, ()>
   fn(source)
     source.map(fn(line) line ++ "\n").through(writeAll(filepath))
 
 // Alias for writeAll (Koka strings are UTF-8).
-pub fun writeUtf8(filepath : path) : filePipe<string, ()>
+pub fun writeUtf8(filepath : path) : writePipe<string, ()>
   writeAll(filepath)
 
 // ---------------------------------------------------------------------------
 // Filesystem operations
 // ---------------------------------------------------------------------------
 
-pub fun listDir(dir : path) : fileStream<path>
+pub fun listDir(dir : path) : fsStream<path>
   eval(fn() listChildren(dir.string, False, 1)).flatMap(fn(entries) emits(entries))
 
-pub fun walk(dir : path, maxDepth : int = 1000) : fileStream<path>
+pub fun walk(dir : path, maxDepth : int = 1000) : fsStream<path>
   eval(fn() listChildren(dir.string, True, maxDepth)).flatMap(fn(entries) emits(entries))
 
-pub fun pathExists(filepath : path) : fileStream<bool>
+pub fun pathExists(filepath : path) : fsStream<bool>
   eval(fn() fileExistsOp(filepath.string))
 
-pub fun createDir(dir : path) : fileStream<()>
-  // `ensure-dir` is a plain std/os op — no fileIO indirection needed.
+pub fun createDir(dir : path) : iostream<()>
+  // `ensure-dir` is a plain std/os op — no file capability needed.
   eval(fn() std/os/dir/ensure-dir(dir))
 
-pub fun fileCopy(from : path, to : path) : fileStream<()>
+pub fun fileCopy(from : path, to : path) : iostream<()>
   eval(fn() std/os/dir/copy-file(from, to))
 
-pub fun deleteFile(filepath : path) : fileStream<()>
+pub fun deleteFile(filepath : path) : fsStream<()>
   eval(fn() removeFileOp(filepath.string))
