@@ -10,7 +10,8 @@ extern import
 
 // ---------------------------------------------------------------------------
 // Raw C FFI. Kept local to this module — the rest of the codebase uses
-// the `fileIO` effect below instead of calling these directly.
+// the capability effects (`fileRead`, `fileWrite`, `fileSystem`) below instead
+// of calling these directly.
 // ---------------------------------------------------------------------------
 
 extern nagare-fopen-read(p : string) : io intptr_t
@@ -44,66 +45,103 @@ pub value type write-handle
   con WriteHandle( fd : intptr_t )
 
 // ---------------------------------------------------------------------------
-// The fileIO effect.
+// Capability effects.
 //
-// `withReadFile`/`withWriteFile` are resource-scoped — they own the open/close
-// pairing so the handle cannot escape. `readChunk`/`writeChunk` operate on an
-// already-open handle. Filesystem ops (`fileExists`, `removeFile`, ...) don't
-// need a handle and are plain `fun`.
+// The file surface is split into three orthogonal capabilities so stream
+// signatures convey exactly which privileges they require:
+//
+//   - `fileRead`    — open/close/read a file + read its text
+//   - `fileWrite`   — open/close/write a file
+//   - `fileSystem`  — existence, removal, directory listing
+//
+// A read-only pipeline carries `<fileRead|io>`; it cannot even type-check a
+// call to `writeChunk`. This is row polymorphism doing real work: capability
+// minimisation at the type level with zero runtime overhead.
+//
+// `fileIO` is kept as an alias that unions the three — any code that used to
+// depend on the combined effect keeps working unchanged.
 // ---------------------------------------------------------------------------
 
-// Flat primitive ops: handler-scoped bracket is implemented in `with-read-file`
-// and `with-write-file` helpers below (as plain Koka functions, not effect ops),
-// using `finally` for pairing. This keeps the effect signature simple — every
-// op is `fun`, no `ctl`/continuation gymnastics.
-pub effect fileIO
+pub effect fileRead
   fun openRead( path : string ) : read-handle
-  fun openWrite( path : string ) : write-handle
   fun closeRead( h : read-handle ) : ()
-  fun closeWrite( h : write-handle ) : ()
   fun readChunk( h : read-handle, size : int ) : string
+  fun readTextFileOp( p : string ) : string
+
+pub effect fileWrite
+  fun openWrite( path : string ) : write-handle
+  fun closeWrite( h : write-handle ) : ()
   fun writeChunk( h : write-handle, content : string ) : int
+
+pub effect fileSystem
   fun fileExistsOp( p : string ) : bool
   fun removeFileOp( p : string ) : ()
   fun listChildren( p : string, recursive : bool, maxDepth : int ) : list<path>
-  fun readTextFileOp( p : string ) : string
 
-// Convenience aliases: tell readers which effects a file stream carries.
-// `fileStream<a>` — a stream that reads/writes files and performs io.
-// `filePipe<a,b>` — a file-IO transformation segment.
+// Legacy combined alias — `fileIO` now means "all three capabilities".
+// Existing code written against `<fileIO|io>` continues to compile.
+pub alias fileIO = <fileRead,fileWrite,fileSystem>
+
+// ---------------------------------------------------------------------------
+// Row aliases: tell readers which capabilities a stream carries.
+// ---------------------------------------------------------------------------
+
+// Read-only stream: opens/reads files, nothing else.
+pub alias readStream<a> = nstream<a, <fileRead|io>>
+pub alias readPipe<a,b> = pipe<a, b, <fileRead|io>>
+
+// Write-only stream: consumes values and writes them.
+pub alias writeStream<a> = nstream<a, <fileWrite|io>>
+pub alias writePipe<a,b> = pipe<a, b, <fileWrite|io>>
+
+// Filesystem metadata stream: lists, exists, remove.
+pub alias fsStream<a> = nstream<a, <fileSystem|io>>
+
+// Legacy combined aliases — a stream that may exercise any file capability.
 pub alias fileStream<a> = nstream<a, <fileIO|io>>
 pub alias filePipe<a,b> = pipe<a, b, <fileIO|io>>
 
-// Resource-scoped read: guarantees close even if body raises.
-pub fun with-read-file( path : string, body : read-handle -> <fileIO|e> a ) : <fileIO|e> a
+// ---------------------------------------------------------------------------
+// Resource-scoped bracket helpers (unchanged API).
+// ---------------------------------------------------------------------------
+
+pub fun with-read-file( path : string, body : read-handle -> <fileRead|e> a ) : <fileRead|e> a
   val h = openRead(path)
   finally({ closeRead(h) }, { body(h) })
 
-// Resource-scoped write: guarantees close even if body raises.
-pub fun with-write-file( path : string, body : write-handle -> <fileIO|e> a ) : <fileIO|e> a
+pub fun with-write-file( path : string, body : write-handle -> <fileWrite|e> a ) : <fileWrite|e> a
   val h = openWrite(path)
   finally({ closeWrite(h) }, { body(h) })
 
 // ---------------------------------------------------------------------------
-// Default handler: bridges ops back to the C FFI. This is the handler that
-// `readAll`/`writeAll`/etc. install internally so the public API stays
-// `iostream<string>`.
+// Default handlers. Each capability has its own handler; the combined
+// `defaultFileIO` installs all three so existing call sites keep working.
 // ---------------------------------------------------------------------------
 
-pub fun defaultFileIO( action : () -> <fileIO|io> a ) : io a
+pub fun defaultFileRead( action : () -> <fileRead|io> a ) : io a
   with handler
     fun openRead(p)
       ReadHandle(nagare-fopen-read(p))
-    fun openWrite(p)
-      WriteHandle(nagare-fopen-write(p))
     fun closeRead(h)
-      nagare-fclose(h.fd)
-    fun closeWrite(h)
       nagare-fclose(h.fd)
     fun readChunk(h, size)
       nagare-fread-chunk(h.fd, size)
+    fun readTextFileOp(p)
+      read-text-file(p.path)
+  action()
+
+pub fun defaultFileWrite( action : () -> <fileWrite|io> a ) : io a
+  with handler
+    fun openWrite(p)
+      WriteHandle(nagare-fopen-write(p))
+    fun closeWrite(h)
+      nagare-fclose(h.fd)
     fun writeChunk(h, content)
       nagare-fwrite-chunk(h.fd, content)
+  action()
+
+pub fun defaultFileSystem( action : () -> <fileSystem|io> a ) : io a
+  with handler
     fun fileExistsOp(p)
       is-file(p.path) || is-directory(p.path)
     fun removeFileOp(p)
@@ -111,6 +149,33 @@ pub fun defaultFileIO( action : () -> <fileIO|io> a ) : io a
     fun listChildren(p, recursive, maxDepth)
       if recursive then list-directory-recursive(p.path, maxDepth)
       else list-directory(p.path)
+  action()
+
+// Combined handler: installs all three capabilities. Call sites that only
+// need one of them should prefer the narrower handler.
+pub fun defaultFileIO( action : () -> <fileIO|io> a ) : io a
+  with handler
+    fun openRead(p)
+      ReadHandle(nagare-fopen-read(p))
+    fun closeRead(h)
+      nagare-fclose(h.fd)
+    fun readChunk(h, size)
+      nagare-fread-chunk(h.fd, size)
     fun readTextFileOp(p)
       read-text-file(p.path)
+  with handler
+    fun openWrite(p)
+      WriteHandle(nagare-fopen-write(p))
+    fun closeWrite(h)
+      nagare-fclose(h.fd)
+    fun writeChunk(h, content)
+      nagare-fwrite-chunk(h.fd, content)
+  with handler
+    fun fileExistsOp(p)
+      is-file(p.path) || is-directory(p.path)
+    fun removeFileOp(p)
+      nagare-remove(p)
+    fun listChildren(p, recursive, maxDepth)
+      if recursive then list-directory-recursive(p.path, maxDepth)
+      else list-directory(p.path)
   action()
