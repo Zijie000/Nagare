@@ -2,6 +2,10 @@
 
 # Koka build outputs / caches
 .koka/
+.koka-opt/
+
+# Compiled binaries
+build/
 
 # Local scratch / temporary files
 tmp/
