@@ -1,0 +1,4 @@
+hello from nagare
+streaming is pull-based
+effects are row-polymorphic
+resources are safe

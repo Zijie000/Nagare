@@ -23,14 +23,26 @@ extern nagare-fopen-write(p : string) : io intptr_t
 extern nagare-fread-chunk(h : intptr_t, size : int) : io string
   c "nagare_fread_chunk"
 
+extern nagare-fread-chunk-bytes(h : intptr_t, size : int) : io vector<int8>
+  c "nagare_fread_chunk_bytes"
+
 extern nagare-fwrite-chunk(h : intptr_t, content : string) : io int
   c "nagare_fwrite_chunk"
+
+extern nagare-fwrite-chunk-bytes(h : intptr_t, content : vector<int8>) : io int
+  c "nagare_fwrite_chunk_bytes"
 
 extern nagare-fclose(h : intptr_t) : io ()
   c "nagare_fclose"
 
 extern nagare-remove(p : string) : io ()
   c "nagare_remove"
+
+pub extern nagare-bytes-to-string(v : vector<int8>) : string
+  c "nagare_bytes_to_string"
+
+pub extern nagare-string-to-bytes(s : string) : vector<int8>
+  c "nagare_string_to_bytes"
 
 // ---------------------------------------------------------------------------
 // Abstract handle types. Users cannot construct these — the only way to get
@@ -66,12 +78,14 @@ pub effect fileRead
   fun openRead( path : string ) : read-handle
   fun closeRead( h : read-handle ) : ()
   fun readChunk( h : read-handle, size : int ) : string
+  fun readChunkBytes( h : read-handle, size : int ) : vector<int8>
   fun readTextFileOp( p : string ) : string
 
 pub effect fileWrite
   fun openWrite( path : string ) : write-handle
   fun closeWrite( h : write-handle ) : ()
   fun writeChunk( h : write-handle, content : string ) : int
+  fun writeChunkBytes( h : write-handle, content : vector<int8> ) : int
 
 pub effect fileSystem
   fun fileExistsOp( p : string ) : bool
@@ -126,6 +140,8 @@ pub fun defaultFileRead( action : () -> <fileRead|io> a ) : io a
       nagare-fclose(h.fd)
     fun readChunk(h, size)
       nagare-fread-chunk(h.fd, size)
+    fun readChunkBytes(h, size)
+      nagare-fread-chunk-bytes(h.fd, size)
     fun readTextFileOp(p)
       read-text-file(p.path)
   action()
@@ -138,6 +154,8 @@ pub fun defaultFileWrite( action : () -> <fileWrite|io> a ) : io a
       nagare-fclose(h.fd)
     fun writeChunk(h, content)
       nagare-fwrite-chunk(h.fd, content)
+    fun writeChunkBytes(h, content)
+      nagare-fwrite-chunk-bytes(h.fd, content)
   action()
 
 pub fun defaultFileSystem( action : () -> <fileSystem|io> a ) : io a
@@ -161,6 +179,8 @@ pub fun defaultFileIO( action : () -> <fileIO|io> a ) : io a
       nagare-fclose(h.fd)
     fun readChunk(h, size)
       nagare-fread-chunk(h.fd, size)
+    fun readChunkBytes(h, size)
+      nagare-fread-chunk-bytes(h.fd, size)
     fun readTextFileOp(p)
       read-text-file(p.path)
   with handler
@@ -170,6 +190,8 @@ pub fun defaultFileIO( action : () -> <fileIO|io> a ) : io a
       nagare-fclose(h.fd)
     fun writeChunk(h, content)
       nagare-fwrite-chunk(h.fd, content)
+    fun writeChunkBytes(h, content)
+      nagare-fwrite-chunk-bytes(h.fd, content)
   with handler
     fun fileExistsOp(p)
       is-file(p.path) || is-directory(p.path)

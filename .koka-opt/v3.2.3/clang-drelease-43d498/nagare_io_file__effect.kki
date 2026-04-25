@@ -1,0 +1,633 @@
+module interface nagare/io/file_effect
+ 
+//------------------------------
+//#kki: import declarations
+ 
+import std/core/types = std/core/types pub = "";
+import std/core/hnd = std/core/hnd pub = "";
+import std/core/exn = std/core/exn pub = "";
+import std/core/bool = std/core/bool pub = "";
+import std/core/order = std/core/order pub = "";
+import std/core/char = std/core/char pub = "";
+import std/core/int = std/core/int pub = "";
+import std/core/vector = std/core/vector pub = "";
+import std/core/string = std/core/string pub = "";
+import std/core/sslice = std/core/sslice pub = "";
+import std/core/list = std/core/list pub = "";
+import std/core/maybe = std/core/maybe pub = "";
+import std/core/maybe2 = std/core/maybe2 pub = "";
+import std/core/either = std/core/either pub = "";
+import std/core/tuple = std/core/tuple pub = "";
+import std/core/lazy = std/core/lazy pub = "";
+import std/core/show = std/core/show pub = "";
+import std/core/debug = std/core/debug pub = "";
+import std/core/delayed = std/core/delayed pub = "";
+import std/core/console = std/core/console pub = "";
+import std/core = std/core = "";
+import std/os/path = std/os/path = "";
+import std/os/dir = std/os/dir = "";
+import std/os/file = std/os/file = "";
+import nagare/core/types = nagare/core/types = "";
+ 
+//------------------------------
+//#kki: external imports
+ 
+ 
+//------------------------------
+//#kki: fixity declarations
+ 
+ 
+//------------------------------
+//#kki: local imported aliases
+ 
+// The `:io` effect is used for functions that perform arbitrary I/O operations.
+local alias std/core/io[78,1,78,29] :: E = <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)> = 4;
+// The `:io-noexn` effect is used for functions that perform arbitrary I/O operations, but raise no exceptions
+local alias std/core/io-noexn[75,1,75,35] :: E = <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)> = 3;
+// The `:io-total` effect is used for functions that perform arbitrary I/O operations, but are terminating without raising exceptions.
+local alias std/core/io-total[72,1,72,58] :: E = <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)> = 2;
+local alias std/core/pure[54,1,54,26] :: E = <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/types/div :: X)> = 1;
+ 
+//------------------------------
+//#kki: type declarations
+ 
+pub value{8,0,8} type read-handle[53,1,54,33] {
+  pub con ReadHandle[54,7,54,16](fd: std/core/types/intptr_t){8,0,8} : (fd : std/core/types/intptr_t) -> read-handle = 1;
+};
+pub recursive effect type fileRead[77,1,82,43] <(e :: E),a> :: (E, V) -> V {
+  pub con @Hnd-fileRead[77,1,77,19](@cfc: std/core/types/int, @fun-closeRead: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, @fun-openRead: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, @fun-readChunk: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, @fun-readChunkBytes: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, @fun-readTextFileOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>){0,6,8} : forall<(e :: E),a> (std/core/types/int, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) -> (fileRead :: (E, V) -> V)<(e :: E),a> = 1;
+};
+pub recursive effect type fileSystem[90,1,93,79] <(e :: E),a> :: (E, V) -> V {
+  pub con @Hnd-fileSystem[90,1,90,21](@cfc: std/core/types/int, @fun-fileExistsOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, @fun-listChildren: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, @fun-removeFileOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>){0,4,8} : forall<(e :: E),a> (std/core/types/int, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) -> (fileSystem :: (E, V) -> V)<(e :: E),a> = 1;
+};
+pub value{8,0,8} type write-handle[56,1,57,34] {
+  pub con WriteHandle[57,7,57,17](fd: std/core/types/intptr_t){8,0,8} : (fd : std/core/types/intptr_t) -> write-handle = 1;
+};
+pub recursive effect type fileWrite[84,1,88,71] <(e :: E),a> :: (E, V) -> V {
+  pub con @Hnd-fileWrite[84,1,84,20](@cfc: std/core/types/int, @fun-closeWrite: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, @fun-openWrite: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, @fun-writeChunk: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, @fun-writeChunkBytes: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>){0,5,8} : forall<(e :: E),a> (std/core/types/int, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) -> (fileWrite :: (E, V) -> V)<(e :: E),a> = 1;
+};
+// Legacy combined alias — `fileIO` now means "all three capabilities".
+// Existing code written against `<fileIO|io>` continues to compile.
+pub alias fileIO[97,1,97,50] :: E = <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> = 1;
+pub alias filePipe[116,1,116,49]<a,b> :: (V, V) -> V = ((nagare/core/types/pipe :: (V, V, E) -> V)<a,b,<((fileIO :: E) == 1 <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>)|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> == 1 ((nagare/core/types/nstream :: (V, E) -> V)<a,<((fileIO :: E) == 1 <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>)|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) -> (nagare/core/types/nstream :: (V, E) -> V)<b,<((fileIO :: E) == 1 <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>)|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) = 5;
+// Legacy combined aliases — a stream that may exercise any file capability.
+pub alias fileStream[115,1,115,49]<a> :: V -> V = (nagare/core/types/nstream :: (V, E) -> V)<a,<((fileIO :: E) == 1 <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>)|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> = 5;
+// Filesystem metadata stream: lists, exists, remove.
+pub alias fsStream[112,1,112,51]<a> :: V -> V = (nagare/core/types/nstream :: (V, E) -> V)<a,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> = 5;
+pub alias readPipe[105,1,105,51]<a,b> :: (V, V) -> V = ((nagare/core/types/pipe :: (V, V, E) -> V)<a,b,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> == 1 ((nagare/core/types/nstream :: (V, E) -> V)<a,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) -> (nagare/core/types/nstream :: (V, E) -> V)<b,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) = 5;
+// Read-only stream: opens/reads files, nothing else.
+pub alias readStream[104,1,104,51]<a> :: V -> V = (nagare/core/types/nstream :: (V, E) -> V)<a,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> = 5;
+pub alias writePipe[109,1,109,53]<a,b> :: (V, V) -> V = ((nagare/core/types/pipe :: (V, V, E) -> V)<a,b,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> == 1 ((nagare/core/types/nstream :: (V, E) -> V)<a,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) -> (nagare/core/types/nstream :: (V, E) -> V)<b,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>>) = 5;
+// Write-only stream: consumes values and writes them.
+pub alias writeStream[108,1,108,53]<a> :: V -> V = (nagare/core/types/nstream :: (V, E) -> V)<a,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>> = 5;
+ 
+//------------------------------
+//#kki: declarations
+ 
+fun nagare-fopen-read[17,8,17,24] : (p : std/core/types/string) -> <(std/core/io :: E)> std/core/types/intptr_t;
+fun nagare-fopen-write[20,8,20,25] : (p : std/core/types/string) -> <(std/core/io :: E)> std/core/types/intptr_t;
+fun nagare-fread-chunk[23,8,23,25] : (h : std/core/types/intptr_t, size : std/core/types/int) -> <(std/core/io :: E)> std/core/types/string;
+fun nagare-fread-chunk-bytes[26,8,26,31] : (h : std/core/types/intptr_t, size : std/core/types/int) -> <(std/core/io :: E)> (std/core/types/vector :: V -> V)<std/core/types/int8>;
+fun nagare-fwrite-chunk[29,8,29,26] : (h : std/core/types/intptr_t, content : std/core/types/string) -> <(std/core/io :: E)> std/core/types/int;
+fun nagare-fwrite-chunk-bytes[32,8,32,32] : (h : std/core/types/intptr_t, content : (std/core/types/vector :: V -> V)<std/core/types/int8>) -> <(std/core/io :: E)> std/core/types/int;
+fun nagare-fclose[35,8,35,20] : (h : std/core/types/intptr_t) -> <(std/core/io :: E)> ();
+fun nagare-remove[38,8,38,20] : (p : std/core/types/string) -> <(std/core/io :: E)> ();
+pub fun nagare-bytes-to-string[41,12,41,33] : (v : (std/core/types/vector :: V -> V)<std/core/types/int8>) -> std/core/types/string;
+pub fun nagare-string-to-bytes[44,12,44,33] : (s : std/core/types/string) -> (std/core/types/vector :: V -> V)<std/core/types/int8>;
+// Automatically generated. Retrieves the `fd` constructor field of the `:read-handle` type.
+pub fun read-handle/fd[54,19,54,20] : (^ @this : read-handle) -> std/core/types/intptr_t;
+pub fun read-handle/@copy[54,7,54,16] : (@this : read-handle, fd : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t>) -> read-handle;
+// Automatically generated. Retrieves the `fd` constructor field of the `:write-handle` type.
+pub fun write-handle/fd[57,20,57,21] : (^ @this : write-handle) -> std/core/types/intptr_t;
+pub fun write-handle/@copy[57,7,57,17] : (@this : write-handle, fd : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t>) -> write-handle;
+// Automatically generated. Retrieves the `@cfc` constructor field of the `:fileRead` type.
+fun fileRead/@cfc[77,1,77,19] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> std/core/types/int;
+// runtime tag for the effect `:fileRead`
+pub val fileRead/@tag[77,1,77,19] : (std/core/hnd/htag :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>;
+// handler for the effect `:fileRead`
+pub fun fileRead/@handle[77,12,77,19] : forall<a,(e :: E),b> (hnd : (fileRead :: (E, V) -> V)<(e :: E),b>, ret : (res : a) -> (e :: E) b, action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(e :: E)> a) -> (e :: E) b;
+// Automatically generated. Retrieves the `@fun-openRead` constructor field of the `:fileRead` type.
+fun fileRead/@fun-openRead[78,7,78,45] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>;
+// select `openRead` operation out of effect `:fileRead`
+pub fun openRead/@select[78,7,78,45] : forall<(e :: E),a> (^ hnd : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>;
+// Call the `fun openRead` operation of the effect `:fileRead`
+pub fun openRead[78,7,78,14] : (path : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> read-handle;
+// Automatically generated. Retrieves the `@fun-closeRead` constructor field of the `:fileRead` type.
+fun fileRead/@fun-closeRead[79,7,79,39] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>;
+// select `closeRead` operation out of effect `:fileRead`
+pub fun closeRead/@select[79,7,79,39] : forall<(e :: E),a> (^ hnd : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>;
+// Call the `fun closeRead` operation of the effect `:fileRead`
+pub fun closeRead[79,7,79,15] : (h : read-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> ();
+// Automatically generated. Retrieves the `@fun-readChunk` constructor field of the `:fileRead` type.
+fun fileRead/@fun-readChunk[80,7,80,55] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>;
+// select `readChunk` operation out of effect `:fileRead`
+pub fun readChunk/@select[80,7,80,55] : forall<(e :: E),a> (^ hnd : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>;
+// Call the `fun readChunk` operation of the effect `:fileRead`
+pub fun readChunk[80,7,80,15] : (h : read-handle, size : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/string;
+// Automatically generated. Retrieves the `@fun-readChunkBytes` constructor field of the `:fileRead` type.
+fun fileRead/@fun-readChunkBytes[81,7,81,66] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>;
+// select `readChunkBytes` operation out of effect `:fileRead`
+pub fun readChunkBytes/@select[81,7,81,66] : forall<(e :: E),a> (^ hnd : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>;
+// Call the `fun readChunkBytes` operation of the effect `:fileRead`
+pub fun readChunkBytes[81,7,81,20] : (h : read-handle, size : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/types/vector :: V -> V)<std/core/types/int8>;
+// Automatically generated. Retrieves the `@fun-readTextFileOp` constructor field of the `:fileRead` type.
+fun fileRead/@fun-readTextFileOp[82,7,82,43] : forall<(e :: E),a> (^ fileRead : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>;
+// select `readTextFileOp` operation out of effect `:fileRead`
+pub fun readTextFileOp/@select[82,7,82,43] : forall<(e :: E),a> (^ hnd : (fileRead :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>;
+// Call the `fun readTextFileOp` operation of the effect `:fileRead`
+pub fun readTextFileOp[82,7,82,20] : (p : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/string;
+// Automatically generated. Retrieves the `@cfc` constructor field of the `:fileWrite` type.
+fun fileWrite/@cfc[84,1,84,20] : forall<(e :: E),a> (^ fileWrite : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> std/core/types/int;
+// runtime tag for the effect `:fileWrite`
+pub val fileWrite/@tag[84,1,84,20] : (std/core/hnd/htag :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>;
+// handler for the effect `:fileWrite`
+pub fun fileWrite/@handle[84,12,84,20] : forall<a,(e :: E),b> (hnd : (fileWrite :: (E, V) -> V)<(e :: E),b>, ret : (res : a) -> (e :: E) b, action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(e :: E)> a) -> (e :: E) b;
+// Automatically generated. Retrieves the `@fun-openWrite` constructor field of the `:fileWrite` type.
+fun fileWrite/@fun-openWrite[85,7,85,47] : forall<(e :: E),a> (^ fileWrite : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// select `openWrite` operation out of effect `:fileWrite`
+pub fun openWrite/@select[85,7,85,47] : forall<(e :: E),a> (^ hnd : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// Call the `fun openWrite` operation of the effect `:fileWrite`
+pub fun openWrite[85,7,85,15] : (path : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> write-handle;
+// Automatically generated. Retrieves the `@fun-closeWrite` constructor field of the `:fileWrite` type.
+fun fileWrite/@fun-closeWrite[86,7,86,41] : forall<(e :: E),a> (^ fileWrite : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>;
+// select `closeWrite` operation out of effect `:fileWrite`
+pub fun closeWrite/@select[86,7,86,41] : forall<(e :: E),a> (^ hnd : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>;
+// Call the `fun closeWrite` operation of the effect `:fileWrite`
+pub fun closeWrite[86,7,86,16] : (h : write-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> ();
+// Automatically generated. Retrieves the `@fun-writeChunk` constructor field of the `:fileWrite` type.
+fun fileWrite/@fun-writeChunk[87,7,87,60] : forall<(e :: E),a> (^ fileWrite : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// select `writeChunk` operation out of effect `:fileWrite`
+pub fun writeChunk/@select[87,7,87,60] : forall<(e :: E),a> (^ hnd : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// Call the `fun writeChunk` operation of the effect `:fileWrite`
+pub fun writeChunk[87,7,87,16] : (h : write-handle, content : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/int;
+// Automatically generated. Retrieves the `@fun-writeChunkBytes` constructor field of the `:fileWrite` type.
+fun fileWrite/@fun-writeChunkBytes[88,7,88,71] : forall<(e :: E),a> (^ fileWrite : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// select `writeChunkBytes` operation out of effect `:fileWrite`
+pub fun writeChunkBytes/@select[88,7,88,71] : forall<(e :: E),a> (^ hnd : (fileWrite :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>;
+// Call the `fun writeChunkBytes` operation of the effect `:fileWrite`
+pub fun writeChunkBytes[88,7,88,21] : (h : write-handle, content : (std/core/types/vector :: V -> V)<std/core/types/int8>) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/int;
+// Automatically generated. Retrieves the `@cfc` constructor field of the `:fileSystem` type.
+fun fileSystem/@cfc[90,1,90,21] : forall<(e :: E),a> (^ fileSystem : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> std/core/types/int;
+// runtime tag for the effect `:fileSystem`
+pub val fileSystem/@tag[90,1,90,21] : (std/core/hnd/htag :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>;
+// handler for the effect `:fileSystem`
+pub fun fileSystem/@handle[90,12,90,21] : forall<a,(e :: E),b> (hnd : (fileSystem :: (E, V) -> V)<(e :: E),b>, ret : (res : a) -> (e :: E) b, action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>|(e :: E)> a) -> (e :: E) b;
+// Automatically generated. Retrieves the `@fun-fileExistsOp` constructor field of the `:fileSystem` type.
+fun fileSystem/@fun-fileExistsOp[91,7,91,39] : forall<(e :: E),a> (^ fileSystem : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>;
+// select `fileExistsOp` operation out of effect `:fileSystem`
+pub fun fileExistsOp/@select[91,7,91,39] : forall<(e :: E),a> (^ hnd : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>;
+// Call the `fun fileExistsOp` operation of the effect `:fileSystem`
+pub fun fileExistsOp[91,7,91,18] : (p : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> std/core/types/bool;
+// Automatically generated. Retrieves the `@fun-removeFileOp` constructor field of the `:fileSystem` type.
+fun fileSystem/@fun-removeFileOp[92,7,92,37] : forall<(e :: E),a> (^ fileSystem : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>;
+// select `removeFileOp` operation out of effect `:fileSystem`
+pub fun removeFileOp/@select[92,7,92,37] : forall<(e :: E),a> (^ hnd : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>;
+// Call the `fun removeFileOp` operation of the effect `:fileSystem`
+pub fun removeFileOp[92,7,92,18] : (p : std/core/types/string) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> ();
+// Automatically generated. Retrieves the `@fun-listChildren` constructor field of the `:fileSystem` type.
+fun fileSystem/@fun-listChildren[93,7,93,79] : forall<(e :: E),a> (^ fileSystem : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>;
+// select `listChildren` operation out of effect `:fileSystem`
+pub fun listChildren/@select[93,7,93,79] : forall<(e :: E),a> (^ hnd : (fileSystem :: (E, V) -> V)<(e :: E),a>) -> (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>;
+// Call the `fun listChildren` operation of the effect `:fileSystem`
+pub fun listChildren[93,7,93,18] : (p : std/core/types/string, recursive : std/core/types/bool, maxDepth : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> (std/core/types/list :: V -> V)<std/os/path/path>;
+// monadic lift
+fun @mlift-with-read-file@10393[1,0,1,0] : forall<a,(e :: E)> (body : (read-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(e :: E)> a, h : read-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(e :: E)> a;
+pub fun with-read-file[122,9,122,22] : forall<a,(e :: E)> (path : std/core/types/string, body : (read-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(e :: E)> a) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(e :: E)> a;
+// monadic lift
+fun @mlift-with-write-file@10394[1,0,1,0] : forall<a,(e :: E)> (body : (write-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(e :: E)> a, h : write-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(e :: E)> a;
+pub fun with-write-file[126,9,126,23] : forall<a,(e :: E)> (path : std/core/types/string, body : (write-handle) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(e :: E)> a) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(e :: E)> a;
+// monadic lift
+fun @mlift-defaultFileRead@10395[1,0,1,0] : (@y-x10247 : std/core/types/intptr_t) -> <(std/core/io :: E)> read-handle;
+pub fun defaultFileRead[135,9,135,23] : forall<a> (action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>|(std/core/io :: E)> a) -> (std/core/io :: E) a;
+// monadic lift
+fun @mlift-defaultFileWrite@10396[1,0,1,0] : (@y-x10253 : std/core/types/intptr_t) -> <(std/core/io :: E)> write-handle;
+pub fun defaultFileWrite[149,9,149,24] : forall<a> (action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>|(std/core/io :: E)> a) -> (std/core/io :: E) a;
+// lifted local: @lift-defaultFileSystem@10193, defaultFileSystem, @spec-x10126
+// specialized: std/core/list/filter, on parameters @uniq-pred@10123, using:
+// @uniq-pred@10123 = std/core/types/@open<(fsys :: X),<(fsys :: X),(div :: X),(exn :: (E, V) -> V)>,(dir : std/os/path/path) -> (fsys :: X) bool,(dir : std/os/path/path) -> <(fsys :: X),(div :: X),(exn :: (E, V) -> V)> bool>(std/os/dir/is-directory)
+fun @lift-defaultFileSystem@10194[1,0,1,0] : (@uniq-xs@10122 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>> (std/core/types/list :: V -> V)<std/os/path/path>;
+// monadic lift
+fun @mlift-trmc-lift-defaultFileSystem@10196@10397[1,0,1,0] : (@acc : (std/core/types/ctx :: V -> V)<(std/core/types/list :: V -> V)<std/os/path/path>>, @uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-zz@10139 : (std/core/types/list :: V -> V)<std/os/path/path>, @uniq-ys@1@10132@10140 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/pure :: E),(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10195, @lift-defaultFileSystem@10193, defaultFileSystem, @spec-x10142
+// specialized: std/core/list/@lift-flatmap@6013, on parameters @uniq-f@10130, using:
+// @uniq-f@10130 = fn<<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-sub@10115: std/os/path/path){
+//   std/os/dir/list-directory-recursive(@uniq-sub@10115, (std/core/types/@Optional<int>((std/core/types/@open<(total :: E),<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>,(x : int, y : int) -> int,(x : int, y : int) -> <(div :: X),(exn :: (E, V) -> V),(fsys :: X)> int>((fn(@uniq-x@10116: int, @uniq-y@10117: int){
+//       (std/core/int/int-sub(@uniq-x@10116, @uniq-y@10117));
+//     }))((match (@uniq-max-depth@10103) {
+//         ((std/core/types/@Optional((@uniq-uniq-max-depth@509@10119: int) : int) : ? int ) as @uniq-pat@10118: ? int)
+//            -> @uniq-uniq-max-depth@509@10119;
+//         ((@skip std/core/types/@None() : ? int ) as @uniq-pat@0@10120: ? int)
+//            -> 1000;
+//       }), 1)))));
+// }
+fun @trmc-lift-defaultFileSystem@10196[1,0,1,0] : (@uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-ys@10131 : (std/core/types/list :: V -> V)<std/os/path/path>, @uniq-zs@10132 : (std/core/types/list :: V -> V)<std/os/path/path>, @acc : (std/core/types/ctx :: V -> V)<(std/core/types/list :: V -> V)<std/os/path/path>>) -> <(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10195, @lift-defaultFileSystem@10193, defaultFileSystem, @spec-x10142
+// specialized: std/core/list/@lift-flatmap@6013, on parameters @uniq-f@10130, using:
+// @uniq-f@10130 = fn<<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-sub@10115: std/os/path/path){
+//   std/os/dir/list-directory-recursive(@uniq-sub@10115, (std/core/types/@Optional<int>((std/core/types/@open<(total :: E),<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>,(x : int, y : int) -> int,(x : int, y : int) -> <(div :: X),(exn :: (E, V) -> V),(fsys :: X)> int>((fn(@uniq-x@10116: int, @uniq-y@10117: int){
+//       (std/core/int/int-sub(@uniq-x@10116, @uniq-y@10117));
+//     }))((match (@uniq-max-depth@10103) {
+//         ((std/core/types/@Optional((@uniq-uniq-max-depth@509@10119: int) : int) : ? int ) as @uniq-pat@10118: ? int)
+//            -> @uniq-uniq-max-depth@509@10119;
+//         ((@skip std/core/types/@None() : ? int ) as @uniq-pat@0@10120: ? int)
+//            -> 1000;
+//       }), 1)))));
+// }
+fun @lift-defaultFileSystem@10196[1,0,1,0] : (@uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-ys@10131 : (std/core/types/list :: V -> V)<std/os/path/path>, @uniq-zs@10132 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10193, defaultFileSystem, @spec-x10129
+// specialized: std/core/list/flatmap, on parameters @uniq-f@10128, using:
+// @uniq-f@10128 = fn<<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-sub@10115: std/os/path/path){
+//   std/os/dir/list-directory-recursive(@uniq-sub@10115, (std/core/types/@Optional<int>((std/core/types/@open<(total :: E),<(div :: X),(exn :: (E, V) -> V),(fsys :: X)>,(x : int, y : int) -> int,(x : int, y : int) -> <(div :: X),(exn :: (E, V) -> V),(fsys :: X)> int>((fn(@uniq-x@10116: int, @uniq-y@10117: int){
+//       (std/core/int/int-sub(@uniq-x@10116, @uniq-y@10117));
+//     }))((match (@uniq-max-depth@10103) {
+//         ((std/core/types/@Optional((@uniq-uniq-max-depth@509@10119: int) : int) : ? int ) as @uniq-pat@10118: ? int)
+//            -> @uniq-uniq-max-depth@509@10119;
+//         ((@skip std/core/types/@None() : ? int ) as @uniq-pat@0@10120: ? int)
+//            -> 1000;
+//       }), 1)))));
+// }
+fun @lift-defaultFileSystem@10195[1,0,1,0] : (@uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-xs@10127 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// monadic lift
+fun @mlift-lift-defaultFileSystem@10193@10398[1,0,1,0] : (@uniq-all@10109 : (std/core/types/list :: V -> V)<std/os/path/path>, @y-x10268 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// monadic lift
+fun @mlift-lift-defaultFileSystem@10193@10399[1,0,1,0] : (@uniq-all@10109 : (std/core/types/list :: V -> V)<std/os/path/path>, @uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-dirs@10110 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>> (std/core/types/list :: V -> V)<std/os/path/path>;
+// monadic lift
+fun @mlift-lift-defaultFileSystem@10193@10400[1,0,1,0] : (@uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-all@10109 : (std/core/types/list :: V -> V)<std/os/path/path>) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: defaultFileSystem, @spec-x10121
+// specialized: std/os/dir/list-directory-recursive, on parameters @uniq-dir@10102, using:
+// @uniq-dir@10102 = std/core/types/@open<(total :: E),<(div :: X),(exn :: (E, V) -> V),(fsys :: X),(alloc :: H -> X)<(global :: H)>,(console/console :: X),(ndet :: X),(net :: X),(read :: H -> X)<(global :: H)>,(ui :: X),(write :: H -> X)<(global :: H)>>,(s : string) -> std/os/path/path,(s : string) -> <(div :: X),(exn :: (E, V) -> V),(fsys :: X),(alloc :: H -> X)<(global :: H)>,(console/console :: X),(ndet :: X),(net :: X),(read :: H -> X)<(global :: H)>,(ui :: X),(write :: H -> X)<(global :: H)>> std/os/path/path>(std/os/path/path)(p@0)
+fun @lift-defaultFileSystem@10193[1,0,1,0] : (p@0 : std/core/types/string, @uniq-max-depth@10103 : (std/core/types/@optional :: V -> V)<std/core/types/int>) -> <(std/core/fsys :: X),(std/core/pure :: E)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10198, @lift-defaultFileSystem@10197, defaultFileSystem, @spec-x10191
+// specialized: std/core/list/@unroll-map@10010, on parameters @uniq-f@10186, using:
+// @uniq-f@10186 = fn<<(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-name@10152: string){
+//   std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(p1 : std/os/path/path, p2 : std/os/path/path) -> std/os/path/path,(p1 : std/os/path/path, p2 : std/os/path/path) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>((fn(@uniq-p1@10153: std/os/path/path, @uniq-p2@10154: std/os/path/path){
+//     val @uniq-parts@0@10093@10163 : ((list :: V -> V)<string>);
+//     val @uniq-parts@10091@10172 : ? ((list :: V -> V)<string>);
+//     (std/os/path/Path((match (@uniq-p1@10153) {
+//         ((@skip std/os/path/Path((@uniq-x@10174: string) : string, (@uniq-pat@0@0@10175: (list :: V -> V)<string>) : (list :: V -> V)<string>) : std/os/path/path ) as @uniq-pat@3@10173: std/os/path/path)
+//            -> @uniq-x@10174;
+//       }), (match (@uniq-parts@10091@10172) {
+//         ((std/core/types/@Optional((@uniq-uniq-parts@95@10177: (list :: V -> V)<string>) : (list :: V -> V)<string>) : ? ((list :: V -> V)<string>) ) as @uniq-pat@1@0@10176: ? ((list :: V -> V)<string>))
+//            -> @uniq-uniq-parts@95@10177;
+//         ((@skip std/core/types/@None() : ? ((list :: V -> V)<string>) ) as @uniq-pat@2@0@10178: ? ((list :: V -> V)<string>))
+//            -> std/core/types/Nil<string>;
+//       })));
+//   }))(@uniq-dir@10144, (std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(s : string) -> std/os/path/path,(s : string) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>(std/os/path/path)(@uniq-name@10152)));
+// }
+fun @trmc-lift-defaultFileSystem@10199[1,0,1,0] : (@uniq-dir@10144 : std/os/path/path, @uniq-xs@10185 : (std/core/types/list :: V -> V)<std/core/types/string>, ^ @acc : (std/core/types/ctx :: V -> V)<(std/core/types/list :: V -> V)<std/os/path/path>>) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10198, @lift-defaultFileSystem@10197, defaultFileSystem, @spec-x10191
+// specialized: std/core/list/@unroll-map@10010, on parameters @uniq-f@10186, using:
+// @uniq-f@10186 = fn<<(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-name@10152: string){
+//   std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(p1 : std/os/path/path, p2 : std/os/path/path) -> std/os/path/path,(p1 : std/os/path/path, p2 : std/os/path/path) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>((fn(@uniq-p1@10153: std/os/path/path, @uniq-p2@10154: std/os/path/path){
+//     val @uniq-parts@0@10093@10163 : ((list :: V -> V)<string>);
+//     val @uniq-parts@10091@10172 : ? ((list :: V -> V)<string>);
+//     (std/os/path/Path((match (@uniq-p1@10153) {
+//         ((@skip std/os/path/Path((@uniq-x@10174: string) : string, (@uniq-pat@0@0@10175: (list :: V -> V)<string>) : (list :: V -> V)<string>) : std/os/path/path ) as @uniq-pat@3@10173: std/os/path/path)
+//            -> @uniq-x@10174;
+//       }), (match (@uniq-parts@10091@10172) {
+//         ((std/core/types/@Optional((@uniq-uniq-parts@95@10177: (list :: V -> V)<string>) : (list :: V -> V)<string>) : ? ((list :: V -> V)<string>) ) as @uniq-pat@1@0@10176: ? ((list :: V -> V)<string>))
+//            -> @uniq-uniq-parts@95@10177;
+//         ((@skip std/core/types/@None() : ? ((list :: V -> V)<string>) ) as @uniq-pat@2@0@10178: ? ((list :: V -> V)<string>))
+//            -> std/core/types/Nil<string>;
+//       })));
+//   }))(@uniq-dir@10144, (std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(s : string) -> std/os/path/path,(s : string) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>(std/os/path/path)(@uniq-name@10152)));
+// }
+fun @lift-defaultFileSystem@10199[1,0,1,0] : (@uniq-dir@10144 : std/os/path/path, @uniq-xs@10185 : (std/core/types/list :: V -> V)<std/core/types/string>) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: @lift-defaultFileSystem@10197, defaultFileSystem, @spec-x10184
+// specialized: std/core/list/map, on parameters @uniq-f@10181, using:
+// @uniq-f@10181 = fn<<(exn :: (E, V) -> V),(fsys :: X)>>(@uniq-name@10152: string){
+//   std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(p1 : std/os/path/path, p2 : std/os/path/path) -> std/os/path/path,(p1 : std/os/path/path, p2 : std/os/path/path) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>((fn(@uniq-p1@10153: std/os/path/path, @uniq-p2@10154: std/os/path/path){
+//     val @uniq-parts@0@10093@10163 : ((list :: V -> V)<string>);
+//     val @uniq-parts@10091@10172 : ? ((list :: V -> V)<string>);
+//     (std/os/path/Path((match (@uniq-p1@10153) {
+//         ((@skip std/os/path/Path((@uniq-x@10174: string) : string, (@uniq-pat@0@0@10175: (list :: V -> V)<string>) : (list :: V -> V)<string>) : std/os/path/path ) as @uniq-pat@3@10173: std/os/path/path)
+//            -> @uniq-x@10174;
+//       }), (match (@uniq-parts@10091@10172) {
+//         ((std/core/types/@Optional((@uniq-uniq-parts@95@10177: (list :: V -> V)<string>) : (list :: V -> V)<string>) : ? ((list :: V -> V)<string>) ) as @uniq-pat@1@0@10176: ? ((list :: V -> V)<string>))
+//            -> @uniq-uniq-parts@95@10177;
+//         ((@skip std/core/types/@None() : ? ((list :: V -> V)<string>) ) as @uniq-pat@2@0@10178: ? ((list :: V -> V)<string>))
+//            -> std/core/types/Nil<string>;
+//       })));
+//   }))(@uniq-dir@10144, (std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X)>,(s : string) -> std/os/path/path,(s : string) -> <(exn :: (E, V) -> V),(fsys :: X)> std/os/path/path>(std/os/path/path)(@uniq-name@10152)));
+// }
+fun @lift-defaultFileSystem@10198[1,0,1,0] : (@uniq-dir@10144 : std/os/path/path, @uniq-xs@10180 : (std/core/types/list :: V -> V)<std/core/types/string>) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)> (std/core/types/list :: V -> V)<std/os/path/path>;
+// lifted local: defaultFileSystem, @spec-x10179
+// specialized: std/os/dir/list-directory, on parameters @uniq-dir@10144, using:
+// @uniq-dir@10144 = std/core/types/@open<(total :: E),<(exn :: (E, V) -> V),(fsys :: X),(div :: X),(alloc :: H -> X)<(global :: H)>,(console/console :: X),(ndet :: X),(net :: X),(read :: H -> X)<(global :: H)>,(ui :: X),(write :: H -> X)<(global :: H)>>,(s : string) -> std/os/path/path,(s : string) -> <(exn :: (E, V) -> V),(fsys :: X),(div :: X),(alloc :: H -> X)<(global :: H)>,(console/console :: X),(ndet :: X),(net :: X),(read :: H -> X)<(global :: H)>,(ui :: X),(write :: H -> X)<(global :: H)>> std/os/path/path>(std/os/path/path)(p@0)
+fun @lift-defaultFileSystem@10197[1,0,1,0] : (p@0 : std/core/types/string) -> <(std/core/fsys :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>> (std/core/types/list :: V -> V)<std/os/path/path>;
+pub fun defaultFileSystem[161,9,161,25] : forall<a> (action : () -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>|(std/core/io :: E)> a) -> (std/core/io :: E) a;
+// monadic lift
+fun @mlift-defaultFileIO@10401[1,0,1,0] : (@y-x10284 : std/core/types/intptr_t) -> <(std/core/io :: E)> read-handle;
+// monadic lift
+fun @mlift-defaultFileIO@10402[1,0,1,0] : (@y-x10289 : std/core/types/intptr_t) -> <(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>,(std/core/console/console :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X),(std/core/types/ndet :: X),(std/core/net :: X),(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/ui :: X),(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> write-handle;
+// Combined handler: installs all three capabilities. Call sites that only
+// need one of them should prefer the narrower handler.
+pub fun defaultFileIO[174,9,174,21] : forall<a> (action : () -> <(fileIO :: E)|(std/core/io :: E)> a) -> (std/core/io :: E) a;
+ 
+//------------------------------
+//#kki: external declarations
+ 
+ 
+//------------------------------
+//#kki: inline definitions
+ 
+//.inline-section
+inline borrow "^" fun read-handle/fd // inline size: 0
+  = fn(@this: read-handle){
+    match (@this) {
+      ((@skip nagare/io/file_effect/ReadHandle((@x: std/core/types/intptr_t) : std/core/types/intptr_t) : read-handle ) as @pat: read-handle)
+         -> @x;
+    };
+  };
+fun read-handle/@copy // inline size: 2
+  = fn(@this: read-handle, fd: (std/core/types/@optional :: V -> V)<std/core/types/intptr_t>){
+    nagare/io/file_effect/ReadHandle((match (fd) {
+      ((std/core/types/@Optional((@uniq-fd@521: std/core/types/intptr_t) : std/core/types/intptr_t) : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t> ) as @pat: ((std/core/types/@optional :: V -> V)<std/core/types/intptr_t>))
+         -> @uniq-fd@521;
+      ((@skip std/core/types/@None() : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t> ) as @pat@0: ((std/core/types/@optional :: V -> V)<std/core/types/intptr_t>))
+         -> (match (@this) {
+          ((@skip nagare/io/file_effect/ReadHandle((@x: std/core/types/intptr_t) : std/core/types/intptr_t) : read-handle ) as @pat@1: read-handle)
+             -> @x;
+        });
+    }));
+  };
+inline borrow "^" fun write-handle/fd // inline size: 0
+  = fn(@this: write-handle){
+    match (@this) {
+      ((@skip nagare/io/file_effect/WriteHandle((@x: std/core/types/intptr_t) : std/core/types/intptr_t) : write-handle ) as @pat: write-handle)
+         -> @x;
+    };
+  };
+fun write-handle/@copy // inline size: 2
+  = fn(@this: write-handle, fd: (std/core/types/@optional :: V -> V)<std/core/types/intptr_t>){
+    nagare/io/file_effect/WriteHandle((match (fd) {
+      ((std/core/types/@Optional((@uniq-fd@545: std/core/types/intptr_t) : std/core/types/intptr_t) : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t> ) as @pat: ((std/core/types/@optional :: V -> V)<std/core/types/intptr_t>))
+         -> @uniq-fd@545;
+      ((@skip std/core/types/@None() : (std/core/types/@optional :: V -> V)<std/core/types/intptr_t> ) as @pat@0: ((std/core/types/@optional :: V -> V)<std/core/types/intptr_t>))
+         -> (match (@this) {
+          ((@skip nagare/io/file_effect/WriteHandle((@x: std/core/types/intptr_t) : std/core/types/intptr_t) : write-handle ) as @pat@1: write-handle)
+             -> @x;
+        });
+    }));
+  };
+inline borrow "^" fun fileRead/@cfc // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@x: std/core/types/int) : std/core/types/int, (@pat@0: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun fileRead/@fun-openRead // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun openRead/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@fun-openRead: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-openRead;
+    });
+  };
+inline fun openRead // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>(path: std/core/types/string){
+    std/core/hnd/@perform1<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileRead :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#openRead/@select, path);
+  };
+inline borrow "^" fun fileRead/@fun-closeRead // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun closeRead/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@fun-closeRead: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-closeRead;
+    });
+  };
+inline fun closeRead // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>(h: read-handle){
+    std/core/hnd/@perform1<read-handle,(),(fileRead :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileRead :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#closeRead/@select, h);
+  };
+inline borrow "^" fun fileRead/@fun-readChunk // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun readChunk/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@fun-readChunk: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-readChunk;
+    });
+  };
+inline fun readChunk // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>(h: read-handle, size: std/core/types/int){
+    std/core/hnd/@perform2<read-handle,std/core/types/int,std/core/types/string,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(fileRead :: (E, V) -> V)>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileRead :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#readChunk/@select, h, size);
+  };
+inline borrow "^" fun fileRead/@fun-readChunkBytes // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun readChunkBytes/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@fun-readChunkBytes: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-readChunkBytes;
+    });
+  };
+inline fun readChunkBytes // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>(h: read-handle, size: std/core/types/int){
+    std/core/hnd/@perform2<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(fileRead :: (E, V) -> V)>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileRead :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#readChunkBytes/@select, h, size);
+  };
+inline borrow "^" fun fileRead/@fun-readTextFileOp // inline size: 0
+  = forall<(e :: E),a> fn(fileRead: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (fileRead) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun readTextFileOp/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileRead :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileRead((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<read-handle,(),(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,read-handle,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>, (@pat@4: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<read-handle,std/core/types/int,(std/core/types/vector :: V -> V)<std/core/types/int8>,(fileRead :: (E, V) -> V),(e :: E),a>, (@fun-readTextFileOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),(e :: E),a>) : (fileRead :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileRead :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-readTextFileOp;
+    });
+  };
+inline fun readTextFileOp // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>(p: std/core/types/string){
+    std/core/hnd/@perform1<std/core/types/string,std/core/types/string,(fileRead :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileRead :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileRead :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileRead :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#readTextFileOp/@select, p);
+  };
+inline borrow "^" fun fileWrite/@cfc // inline size: 0
+  = forall<(e :: E),a> fn(fileWrite: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (fileWrite) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@x: std/core/types/int) : std/core/types/int, (@pat@0: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun fileWrite/@fun-openWrite // inline size: 0
+  = forall<(e :: E),a> fn(fileWrite: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (fileWrite) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun openWrite/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@fun-openWrite: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-openWrite;
+    });
+  };
+inline fun openWrite // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>(path: std/core/types/string){
+    std/core/hnd/@perform1<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileWrite :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#openWrite/@select, path);
+  };
+inline borrow "^" fun fileWrite/@fun-closeWrite // inline size: 0
+  = forall<(e :: E),a> fn(fileWrite: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (fileWrite) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun closeWrite/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@fun-closeWrite: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-closeWrite;
+    });
+  };
+inline fun closeWrite // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>(h: write-handle){
+    std/core/hnd/@perform1<write-handle,(),(fileWrite :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileWrite :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#closeWrite/@select, h);
+  };
+inline borrow "^" fun fileWrite/@fun-writeChunk // inline size: 0
+  = forall<(e :: E),a> fn(fileWrite: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (fileWrite) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun writeChunk/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@fun-writeChunk: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-writeChunk;
+    });
+  };
+inline fun writeChunk // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>(h: write-handle, content: std/core/types/string){
+    std/core/hnd/@perform2<write-handle,std/core/types/string,std/core/types/int,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(fileWrite :: (E, V) -> V)>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileWrite :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#writeChunk/@select, h, content);
+  };
+inline borrow "^" fun fileWrite/@fun-writeChunkBytes // inline size: 0
+  = forall<(e :: E),a> fn(fileWrite: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (fileWrite) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun writeChunkBytes/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileWrite :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileWrite((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<write-handle,(),(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,write-handle,(fileWrite :: (E, V) -> V),(e :: E),a>, (@pat@3: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,std/core/types/string,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>, (@fun-writeChunkBytes: (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause2 :: (V, V, V, (E, V) -> V, E, V) -> V)<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,(fileWrite :: (E, V) -> V),(e :: E),a>) : (fileWrite :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileWrite :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-writeChunkBytes;
+    });
+  };
+inline fun writeChunkBytes // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>>(h: write-handle, content: (std/core/types/vector :: V -> V)<std/core/types/int8>){
+    std/core/hnd/@perform2<write-handle,(std/core/types/vector :: V -> V)<std/core/types/int8>,std/core/types/int,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(fileWrite :: (E, V) -> V)>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileWrite :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileWrite :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileWrite :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#writeChunkBytes/@select, h, content);
+  };
+inline borrow "^" fun fileSystem/@cfc // inline size: 0
+  = forall<(e :: E),a> fn(fileSystem: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (fileSystem) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@x: std/core/types/int) : std/core/types/int, (@pat@0: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun fileSystem/@fun-fileExistsOp // inline size: 0
+  = forall<(e :: E),a> fn(fileSystem: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (fileSystem) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun fileExistsOp/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@fun-fileExistsOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-fileExistsOp;
+    });
+  };
+inline fun fileExistsOp // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>>(p: std/core/types/string){
+    std/core/hnd/@perform1<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileSystem :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#fileExistsOp/@select, p);
+  };
+inline borrow "^" fun fileSystem/@fun-removeFileOp // inline size: 0
+  = forall<(e :: E),a> fn(fileSystem: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (fileSystem) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun removeFileOp/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@fun-removeFileOp: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-removeFileOp;
+    });
+  };
+inline fun removeFileOp // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>>(p: std/core/types/string){
+    std/core/hnd/@perform1<std/core/types/string,(),(fileSystem :: (E, V) -> V),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileSystem :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#removeFileOp/@select, p);
+  };
+inline borrow "^" fun fileSystem/@fun-listChildren // inline size: 0
+  = forall<(e :: E),a> fn(fileSystem: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (fileSystem) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@x: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @x;
+    });
+  };
+inline borrow "^" fun listChildren/@select // inline size: 0
+  = forall<(e :: E),a> fn(hnd: (fileSystem :: (E, V) -> V)<(e :: E),a>){
+    (match (hnd) {
+      ((@skip nagare/io/file_effect/@Hnd-fileSystem((@pat@0: std/core/types/int) : std/core/types/int, (@pat@1: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,std/core/types/bool,(fileSystem :: (E, V) -> V),(e :: E),a>, (@fun-listChildren: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<(std/core/types/string, std/core/types/bool, std/core/types/int),(std/core/types/list :: V -> V)<std/os/path/path>,(fileSystem :: (E, V) -> V),(e :: E),a>, (@pat@2: (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (std/core/hnd/clause1 :: (V, V, (E, V) -> V, E, V) -> V)<std/core/types/string,(),(fileSystem :: (E, V) -> V),(e :: E),a>) : (fileSystem :: (E, V) -> V)<(e :: E),a> ) as @pat: ((fileSystem :: (E, V) -> V)<(e :: E),a>))
+         -> @fun-listChildren;
+    });
+  };
+inline fun listChildren // inline size: 5
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>>(p: std/core/types/string, recursive: std/core/types/bool, maxDepth: std/core/types/int){
+    std/core/hnd/@perform3<std/core/types/string,std/core/types/bool,std/core/types/int,(std/core/types/list :: V -> V)<std/os/path/path>,<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(fileSystem :: (E, V) -> V)>((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/hnd/ev-index) -> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>,(i : std/core/hnd/ev-index) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> (std/core/hnd/ev :: ((E, V) -> V) -> V)<(fileSystem :: (E, V) -> V)>>((std/core/hnd/@evv-at<(fileSystem :: (E, V) -> V)>))((std/core/types/@open<(std/core/types/total :: E),<(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>>,(i : std/core/types/int) -> std/core/types/ssize_t,(i : std/core/types/int) -> <(std/core/types/handled :: ((E, V) -> V) -> X)<(fileSystem :: (E, V) -> V)>> std/core/types/ssize_t>(std/core/types/@make-ssize_t)(0)))), nagare/io/file_effect/#listChildren/@select, p, recursive, maxDepth);
+  };
+fun @lift-defaultFileSystem@10194 // inline size: 3
+  = fn<<(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>>>(@uniq-xs@10122: (std/core/types/list :: V -> V)<std/os/path/path>){
+    val @uniq-pred@10123[1,0,1,0] : (dir : std/os/path/path) -> <(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>> std/core/types/bool
+          = std/core/types/@open<<(std/core/fsys :: X)>,<(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>>,(dir : std/os/path/path) -> <(std/core/fsys :: X)> std/core/types/bool,(dir : std/os/path/path) -> <(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>> std/core/types/bool>(std/os/dir/is-directory);
+    match (@uniq-xs@10122) {
+      ((std/core/types/Nil() : (std/core/types/list :: V -> V)<std/os/path/path> ) as @uniq-pat@2@10124: ((std/core/types/list :: V -> V)<std/os/path/path>))
+         -> std/core/types/Nil<std/os/path/path>;
+      (@uniq-pat@10125: ((std/core/types/list :: V -> V)<std/os/path/path>))
+         -> std/core/list/@unroll-filter@10007<std/os/path/path,<(std/core/fsys :: X),(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>>>(@uniq-xs@10122, @uniq-pred@10123);
+    };
+  };
+fun @lift-defaultFileSystem@10195 // inline size: 1
+  = fn<<(std/core/types/div :: X),(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)>>(@uniq-max-depth@10103: (std/core/types/@optional :: V -> V)<std/core/types/int>, @uniq-xs@10127: (std/core/types/list :: V -> V)<std/os/path/path>){
+    nagare/io/file_effect/@lift-defaultFileSystem@10196(@uniq-max-depth@10103, (std/core/types/Nil<std/os/path/path>), @uniq-xs@10127);
+  };
+borrow "__^" fun @lift-defaultFileSystem@10198 // inline size: 2
+  = fn<<(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,(std/core/fsys :: X)>>(@uniq-dir@10144: std/os/path/path, @uniq-xs@10180: (std/core/types/list :: V -> V)<std/core/types/string>){
+    match (@uniq-xs@10180) {
+      ((std/core/types/Nil() : (std/core/types/list :: V -> V)<std/core/types/string> ) as @uniq-pat@0@10182: ((std/core/types/list :: V -> V)<std/core/types/string>))
+         -> std/core/types/Nil<std/os/path/path>;
+      (@uniq-pat@10183: ((std/core/types/list :: V -> V)<std/core/types/string>))
+         -> nagare/io/file_effect/@lift-defaultFileSystem@10199(@uniq-dir@10144, @uniq-xs@10180);
+    };
+  };

@@ -31,6 +31,7 @@ fun mockReadFileIO(
         Cons(c, rest) ->
           chunks := rest
           c
+    fun readChunkBytes(_h, _size) vector(0, 0.int8)
     fun readTextFileOp(_p) ""
   action()
 
