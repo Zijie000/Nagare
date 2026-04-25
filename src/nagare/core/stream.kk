@@ -49,6 +49,25 @@ pub fun emits<a,e>(values : list<a>) : nstream<a,e>
 pub fun evals<a,e>(thunks : list<() -> e a>) : nstream<a,e>
   Stream(fromEvalsPull(thunks))
 
+// Unbounded source: emits seed, f(seed), f(f(seed)), ... one per step.
+// Each step is wrapped in PEval so the pull stays lazy — only consumed
+// elements are materialised. Safe under `take(n)` and other early-stop
+// combinators; consuming without a bound will not terminate.
+// Unbounded source: emits seed, f(seed), f(f(seed)), ... one per step.
+// Each step is wrapped in PEval so the pull stays lazy — only consumed
+// elements are materialised. Safe under `take(n)` and other early-stop
+// combinators; consuming without a bound will not terminate.
+//
+// The `div` effect on the resulting stream's row reflects that fact: any
+// pipeline that drains an `iterate` without bounding it is divergent, and
+// Koka tracks that statically. Bound it with `take`/`takeWhile` to use it
+// in an `io`-only context (handlers can mask `div` once a bound is proven).
+pub fun iterate<a,e>(seed : a, f : a -> a) : div nstream<a,<div|e>>
+  Stream(iteratePull(seed, f))
+
+fun iteratePull<a,e>(seed : a, f : a -> a) : div pull<a,<div|e>>
+  POutput(Chunk([seed]), PEval(fn() iteratePull(f(seed), f)))
+
 // Concatenate multiple streams.
 pub fun concat<a,e>(streams : list<nstream<a,e>>) : nstream<a,e>
   concatList(streams)

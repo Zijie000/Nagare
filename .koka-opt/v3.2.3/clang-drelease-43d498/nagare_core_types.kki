@@ -1,0 +1,183 @@
+module interface nagare/core/types
+ 
+//------------------------------
+//#kki: import declarations
+ 
+import std/core/types = std/core/types pub = "";
+import std/core/hnd = std/core/hnd pub = "";
+import std/core/exn = std/core/exn pub = "";
+import std/core/bool = std/core/bool pub = "";
+import std/core/order = std/core/order pub = "";
+import std/core/char = std/core/char pub = "";
+import std/core/int = std/core/int pub = "";
+import std/core/vector = std/core/vector pub = "";
+import std/core/string = std/core/string pub = "";
+import std/core/sslice = std/core/sslice pub = "";
+import std/core/list = std/core/list pub = "";
+import std/core/maybe = std/core/maybe pub = "";
+import std/core/maybe2 = std/core/maybe2 pub = "";
+import std/core/either = std/core/either pub = "";
+import std/core/tuple = std/core/tuple pub = "";
+import std/core/lazy = std/core/lazy pub = "";
+import std/core/show = std/core/show pub = "";
+import std/core/debug = std/core/debug pub = "";
+import std/core/delayed = std/core/delayed pub = "";
+import std/core/console = std/core/console pub = "";
+import std/core = std/core = "";
+ 
+//------------------------------
+//#kki: external imports
+ 
+ 
+//------------------------------
+//#kki: fixity declarations
+ 
+ 
+//------------------------------
+//#kki: local imported aliases
+ 
+ 
+//------------------------------
+//#kki: type declarations
+ 
+// A batch of emitted values; streams output chunks rather than single elements only.
+pub value{0,1,8} type chunk[4,1,6,31] <a> :: V -> V {
+  pub con Chunk[6,7,6,11](values: (std/core/types/list :: V -> V)<a>){0,1,8} : forall<a> (values : (std/core/types/list :: V -> V)<a>) -> (chunk :: V -> V)<a> = 1;
+};
+// Pull program: the internal state machine stepped by the interpreter (FS2-style).
+// The row variable `e` records the effects required to step the program.
+// Pure pulls instantiate `e` to `<>`; effectful pulls keep `<io>` (or any user-defined row).
+pub recursive type pull[11,1,16,78] <a,(e :: E)> :: (V, E) -> V {
+  pub con PDone[13,7,13,11]{0,0,0} : forall<a,(e :: E)> (pull :: (V, E) -> V)<a,(e :: E)> = 1;
+  // Stream finished; no more output.
+  pub con POutput[14,7,14,13](out: (chunk :: V -> V)<a>, tail: (pull :: (V, E) -> V)<a,(e :: E)>){0,2,8} : forall<a,(e :: E)> (out : (chunk :: V -> V)<a>, tail : (pull :: (V, E) -> V)<a,(e :: E)>) -> (pull :: (V, E) -> V)<a,(e :: E)> = 2;
+  // Emit a chunk, then continue with `tail`.
+  pub con PEval[15,7,15,11](next: () -> (e :: E) (pull :: (V, E) -> V)<a,(e :: E)>){0,1,8} : forall<a,(e :: E)> (next : () -> (e :: E) (pull :: (V, E) -> V)<a,(e :: E)>) -> (pull :: (V, E) -> V)<a,(e :: E)> = 3;
+  // Defer the next pull to an effectful thunk.
+  pub con PAcquire[16,7,16,14](acquire: () -> (e :: E) (), release: () -> (e :: E) (), tail: (pull :: (V, E) -> V)<a,(e :: E)>){0,3,8} : forall<a,(e :: E)> (acquire : () -> (e :: E) (), release : () -> (e :: E) (), tail : (pull :: (V, E) -> V)<a,(e :: E)>) -> (pull :: (V, E) -> V)<a,(e :: E)> = 4;
+};
+// User-facing stream: a thin wrapper around one pull program.
+pub value{0,1,8} type nstream[19,1,20,32] <a,(e :: E)> :: (V, E) -> V {
+  pub con Stream[20,7,20,12](step: (pull :: (V, E) -> V)<a,(e :: E)>){0,1,8} : forall<a,(e :: E)> (step : (pull :: (V, E) -> V)<a,(e :: E)>) -> (nstream :: (V, E) -> V)<a,(e :: E)> = 1;
+};
+// Reusable stream-to-stream transformation (pipeline segment).
+pub alias pipe[23,1,23,52]<a,b,(e :: E)> :: (V, V, E) -> V = ((nstream :: (V, E) -> V)<a,(e :: E)>) -> (nstream :: (V, E) -> V)<b,(e :: E)> = 1;
+pub alias iopipe[27,1,27,36]<a,b> :: (V, V) -> V = ((pipe :: (V, V, E) -> V)<a,b,((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)> == 1 ((nstream :: (V, E) -> V)<a,((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>) -> (nstream :: (V, E) -> V)<b,((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)>) = 5;
+// Convenience aliases. Most users want `iostream`/`iopipe`.
+pub alias iostream[26,1,26,37]<a> :: V -> V = (nstream :: (V, E) -> V)<a,((std/core/io :: E) == 4 <(std/core/types/handled :: ((E, V) -> V) -> X)<(std/core/exn/exn :: (E, V) -> V)>,((std/core/io-noexn :: E) == 3 <(std/core/types/div :: X),((std/core/io-total :: E) == 2 <(std/core/types/ndet :: X),(std/core/console/console :: X),(std/core/net :: X),(std/core/fsys :: X),(std/core/ui :: X),((std/core/types/st :: H -> E)<(std/core/types/global :: H)> == 1 <(std/core/types/read :: H -> X)<(std/core/types/global :: H)>,(std/core/types/write :: H -> X)<(std/core/types/global :: H)>,(std/core/types/alloc :: H -> X)<(std/core/types/global :: H)>>)>)>)>)> = 5;
+ 
+//------------------------------
+//#kki: declarations
+ 
+// Automatically generated. Retrieves the `values` constructor field of the `:chunk` type.
+pub fun chunk/values[6,14,6,19] : forall<a> (^ chunk : (chunk :: V -> V)<a>) -> (std/core/types/list :: V -> V)<a>;
+pub fun chunk/@copy[6,7,6,11] : forall<a> (@this : (chunk :: V -> V)<a>, values : (std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>>) -> (chunk :: V -> V)<a>;
+// Automatically generated. Tests for the `PDone` constructor of the `:pull` type.
+pub fip fun is-pdone[13,7,13,11] : forall<a,(e :: E)> (^ pull : (pull :: (V, E) -> V)<a,(e :: E)>) -> std/core/types/bool;
+// Automatically generated. Tests for the `POutput` constructor of the `:pull` type.
+pub fip fun is-poutput[14,7,14,13] : forall<a,(e :: E)> (^ pull : (pull :: (V, E) -> V)<a,(e :: E)>) -> std/core/types/bool;
+// Automatically generated. Tests for the `PEval` constructor of the `:pull` type.
+pub fip fun is-peval[15,7,15,11] : forall<a,(e :: E)> (^ pull : (pull :: (V, E) -> V)<a,(e :: E)>) -> std/core/types/bool;
+// Automatically generated. Tests for the `PAcquire` constructor of the `:pull` type.
+pub fip fun is-pacquire[16,7,16,14] : forall<a,(e :: E)> (^ pull : (pull :: (V, E) -> V)<a,(e :: E)>) -> std/core/types/bool;
+// Automatically generated. Retrieves the `step` constructor field of the `:nstream` type.
+pub fun nstream/step[20,15,20,18] : forall<a,(e :: E)> (^ nstream : (nstream :: (V, E) -> V)<a,(e :: E)>) -> (pull :: (V, E) -> V)<a,(e :: E)>;
+pub fun nstream/@copy[20,7,20,12] : forall<a,(e :: E)> (@this : (nstream :: (V, E) -> V)<a,(e :: E)>, step : (std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>>) -> (nstream :: (V, E) -> V)<a,(e :: E)>;
+// Unwrap a stream into its underlying pull program.
+pub fun toPull[30,9,30,14] : forall<a,(e :: E)> (source : (nstream :: (V, E) -> V)<a,(e :: E)>) -> (pull :: (V, E) -> V)<a,(e :: E)>;
+// Wrap a pull program back into a user-facing stream.
+pub fun fromPull[35,9,35,16] : forall<a,(e :: E)> (step : (pull :: (V, E) -> V)<a,(e :: E)>) -> (nstream :: (V, E) -> V)<a,(e :: E)>;
+ 
+//------------------------------
+//#kki: external declarations
+ 
+ 
+//------------------------------
+//#kki: inline definitions
+ 
+//.inline-section
+inline borrow "^" fun chunk/values // inline size: 0
+  = forall<a> fn(chunk: (chunk :: V -> V)<a>){
+    (match (chunk) {
+      ((@skip nagare/core/types/Chunk((@x: (std/core/types/list :: V -> V)<a>) : (std/core/types/list :: V -> V)<a>) : (chunk :: V -> V)<a> ) as @pat: ((chunk :: V -> V)<a>))
+         -> @x;
+    });
+  };
+fun chunk/@copy // inline size: 2
+  = forall<a> fn(@this: (chunk :: V -> V)<a>, values: (std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>>){
+    nagare/core/types/Chunk<a>((match (values) {
+      ((std/core/types/@Optional((@uniq-values@115: (std/core/types/list :: V -> V)<a>) : (std/core/types/list :: V -> V)<a>) : (std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>> ) as @pat: ((std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>>))
+         -> @uniq-values@115;
+      ((@skip std/core/types/@None() : (std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>> ) as @pat@0: ((std/core/types/@optional :: V -> V)<(std/core/types/list :: V -> V)<a>>))
+         -> (match (@this) {
+          ((@skip nagare/core/types/Chunk((@x: (std/core/types/list :: V -> V)<a>) : (std/core/types/list :: V -> V)<a>) : (chunk :: V -> V)<a> ) as @pat@1: ((chunk :: V -> V)<a>))
+             -> @x;
+        });
+    }));
+  };
+inline borrow "^" fip fun is-pdone // inline size: 1
+  = forall<a,(e :: E)> fn(pull: (pull :: (V, E) -> V)<a,(e :: E)>){
+    (match (pull) {
+      ((nagare/core/types/PDone() : (pull :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/True;
+      (@pat@0: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/False;
+    });
+  };
+inline borrow "^" fip fun is-poutput // inline size: 1
+  = forall<a,(e :: E)> fn(pull: (pull :: (V, E) -> V)<a,(e :: E)>){
+    (match (pull) {
+      ((nagare/core/types/POutput((@pat@0: (chunk :: V -> V)<a>) : (chunk :: V -> V)<a>, (@pat@1: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/True;
+      (@pat@2: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/False;
+    });
+  };
+inline borrow "^" fip fun is-peval // inline size: 1
+  = forall<a,(e :: E)> fn(pull: (pull :: (V, E) -> V)<a,(e :: E)>){
+    (match (pull) {
+      ((nagare/core/types/PEval((@pat@0: () -> (e :: E) (pull :: (V, E) -> V)<a,(e :: E)>) : () -> (e :: E) (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/True;
+      (@pat@1: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/False;
+    });
+  };
+inline borrow "^" fip fun is-pacquire // inline size: 1
+  = forall<a,(e :: E)> fn(pull: (pull :: (V, E) -> V)<a,(e :: E)>){
+    (match (pull) {
+      ((nagare/core/types/PAcquire((@pat@0: () -> (e :: E) ()) : () -> (e :: E) (), (@pat@1: () -> (e :: E) ()) : () -> (e :: E) (), (@pat@2: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/True;
+      (@pat@3: ((pull :: (V, E) -> V)<a,(e :: E)>))
+         -> std/core/types/False;
+    });
+  };
+inline borrow "^" fun nstream/step // inline size: 0
+  = forall<a,(e :: E)> fn(nstream: (nstream :: (V, E) -> V)<a,(e :: E)>){
+    (match (nstream) {
+      ((@skip nagare/core/types/Stream((@x: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (nstream :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((nstream :: (V, E) -> V)<a,(e :: E)>))
+         -> @x;
+    });
+  };
+fun nstream/@copy // inline size: 2
+  = forall<a,(e :: E)> fn(@this: (nstream :: (V, E) -> V)<a,(e :: E)>, step: (std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>>){
+    nagare/core/types/Stream<a,(e :: E)>((match (step) {
+      ((std/core/types/@Optional((@uniq-step@277: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>> ) as @pat: ((std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>>))
+         -> @uniq-step@277;
+      ((@skip std/core/types/@None() : (std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>> ) as @pat@0: ((std/core/types/@optional :: V -> V)<(pull :: (V, E) -> V)<a,(e :: E)>>))
+         -> (match (@this) {
+          ((@skip nagare/core/types/Stream((@x: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (nstream :: (V, E) -> V)<a,(e :: E)> ) as @pat@1: ((nstream :: (V, E) -> V)<a,(e :: E)>))
+             -> @x;
+        });
+    }));
+  };
+inline fun toPull // inline size: 0
+  = forall<a,(e :: E)> fn(source: (nstream :: (V, E) -> V)<a,(e :: E)>){
+    (match (source) {
+      ((@skip nagare/core/types/Stream((step: (pull :: (V, E) -> V)<a,(e :: E)>) : (pull :: (V, E) -> V)<a,(e :: E)>) : (nstream :: (V, E) -> V)<a,(e :: E)> ) as @pat: ((nstream :: (V, E) -> V)<a,(e :: E)>))
+         -> step;
+    });
+  };
+fun fromPull // inline size: 1
+  = forall<a,(e :: E)> fn(step: (pull :: (V, E) -> V)<a,(e :: E)>){
+    nagare/core/types/Stream<a,(e :: E)>(step);
+  };

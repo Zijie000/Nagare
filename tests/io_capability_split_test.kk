@@ -28,6 +28,7 @@ fun mockRead(
       match !chunks
         []            -> ""
         Cons(c, rest) -> { chunks := rest; c }
+    fun readChunkBytes(_h, _size) vector(0, 0.int8)
     fun readTextFileOp(_p) ""
   action()
 
@@ -41,6 +42,7 @@ fun mockWrite(
     fun writeChunk(_h, content)
       buf := Cons(content, !buf)
       content.count
+    fun writeChunkBytes(_h, content) content.length
   action()
 
 fun mockFs(

@@ -28,6 +28,7 @@ fun mockFileIO(
     fun writeChunk(_h, content)
       buf := Cons(content, !buf)
       content.count
+    fun writeChunkBytes(_h, content) content.length
   action()
 
 pub fun suiteBody() : <test-ctx,io> ()

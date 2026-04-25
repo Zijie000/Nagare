@@ -18,6 +18,113 @@ import nagare/io/file_effect
 // `with-read-file`, etc. without touching the filesystem.
 // ---------------------------------------------------------------------------
 
+// Raw byte sequence: a chunk of arbitrary binary data.
+pub alias bytes = vector<int8>
+
+// ---------------------------------------------------------------------------
+// Binary (bytes) read/write
+// ---------------------------------------------------------------------------
+
+// Loop reading byte chunks from an open read-handle until EOF.
+fun readPullBytes(h : read-handle, chunkSize : int) : div pull<bytes, <fileRead|io>>
+  PEval(fn()
+    val chunk = readChunkBytes(h, chunkSize)
+    if chunk.length == 0 then PDone
+    else POutput(Chunk([chunk]), readPullBytes(h, chunkSize))
+  )
+
+// Read a file as a truly lazy stream of byte chunks (resource-safe, one chunk at a time).
+pub fun readAllStreamingBytes(filepath : path, chunkSize : int = 4096) : readStream<bytes>
+  Stream(PEval(fn()
+    val hRef : ref<global, maybe<read-handle>> = ref(Nothing)
+    PAcquire(
+      fn() { hRef := Just(openRead(filepath.string)) },
+      fn() { match !hRef { Just(h) -> closeRead(h); Nothing -> () } },
+      PEval(fn() { match !hRef { Just(h) -> readPullBytes(h, chunkSize); Nothing -> PDone } })
+    )
+  ))
+
+// Helper: drain the read-handle into a list of byte chunks.
+fun readAllChunksBytes(h : read-handle, chunkSize : int, acc : list<bytes>) : <fileRead|io> list<bytes>
+  val chunk = readChunkBytes(h, chunkSize)
+  if chunk.length == 0 then acc.reverse
+  else readAllChunksBytes(h, chunkSize, Cons(chunk, acc))
+
+// Read a file eagerly into byte chunks (not lazy — use readAllStreamingBytes for large files).
+pub fun readAllBytes(filepath : path, chunkSize : int = 4096) : readStream<bytes>
+  Stream(PEval(fn()
+    with-read-file(filepath.string, fn(h)
+      val chunks = readAllChunksBytes(h, chunkSize, [])
+      POutput(Chunk(chunks), PDone)
+    )
+  ))
+
+// Write a stream of byte chunks to a file.
+pub fun writeAllBytes(filepath : path) : writePipe<bytes, ()>
+  fn(source)
+    Stream(PEval(fn()
+      with-write-file(filepath.string, fn(h)
+        writeAllChunksBytes(source.toPull, h)
+        POutput(Chunk([()]), PDone)
+      )
+    ))
+
+fun writeAllChunksBytes(source : pull<bytes, <fileWrite|io>>, h : write-handle) : <fileWrite|io> ()
+  match source
+    PDone -> ()
+    POutput(out, tail) ->
+      match out
+        Chunk(values) ->
+          values.foreach(fn(b) { writeChunkBytes(h, b); () })
+          writeAllChunksBytes(tail, h)
+    PEval(next) ->
+      writeAllChunksBytes(next(), h)
+    PAcquire(acquire, release, tail) ->
+      acquire()
+      finally(release, { writeAllChunksBytes(tail, h) })
+
+// ---------------------------------------------------------------------------
+// Text ↔ bytes bridge
+// ---------------------------------------------------------------------------
+
+// Decode a stream of byte chunks into UTF-8 strings.
+// Handles multi-byte codepoints split across chunk boundaries by carrying
+// incomplete leading bytes in a per-step leftover list.
+pub fun decodeUtf8<e>(source : nstream<bytes,e>) : nstream<string,e>
+  match source
+    Stream(step) -> Stream(decodeUtf8Pull(step, []))
+
+fun decodeUtf8Pull<e>(source : pull<bytes,e>, leftover : list<int8>) : pull<string,e>
+  match source
+    PDone ->
+      if leftover.is-empty then PDone
+      else POutput(Chunk(["�"]), PDone)
+    POutput(out, tail) ->
+      match out
+        Chunk(chunks) ->
+          val combined = chunks.foldl(leftover, fn(acc, b) acc ++ b.vlist)
+          val (text, rest) = trydecode-utf8-partial(combined)
+          if text.is-empty
+          then decodeUtf8Pull(tail, rest)
+          else POutput(Chunk([text]), decodeUtf8Pull(tail, rest))
+    PEval(next) ->
+      PEval(fn() decodeUtf8Pull(next(), leftover))
+    PAcquire(acquire, release, tail) ->
+      PAcquire(acquire, release, decodeUtf8Pull(tail, leftover))
+
+// Decode as many complete UTF-8 codepoints as possible from a byte list.
+// Returns (decoded-string, leftover-incomplete-bytes).
+// We pass the full buffer to the C FFI which handles UTF-8 reconstruction;
+// any trailing incomplete sequence is returned as leftover for the next chunk.
+fun trydecode-utf8-partial(buf : list<int8>) : (string, list<int8>)
+  if buf.is-empty then ("", [])
+  else
+    val vec = buf.vector
+    val s   = nagare-bytes-to-string(vec)
+    val consumed = nagare-string-to-bytes(s).vlist.length
+    val rest = buf.drop(consumed)
+    (s, rest)
+
 // Loop reading chunks from an open read-handle until EOF.
 fun readPull(h : read-handle, chunkSize : int) : div pull<string, <fileRead|io>>
   PEval(fn()
