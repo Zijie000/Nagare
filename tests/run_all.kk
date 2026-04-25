@@ -17,6 +17,7 @@ import io_file_streaming_test
 import io_capability_split_test
 import io_file_bytes_test
 import state_exn_test
+import core_tier1_test
 
 // Aggregate entry point: runs every suite, then exits non-zero on any failure.
 pub fun main() : io ()
@@ -32,8 +33,9 @@ pub fun main() : io ()
   val (p10, t10) = runSuite("effect/state+exn", state_exn_test/suiteBody)
   val (p11, t11) = runSuite("io/file-bytes", io_file_bytes_test/suiteBody)
   val (p12, t12) = runSuite("core/infinite", core_infinite_test/suiteBody)
-  val passed = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12
-  val total = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10 + t11 + t12
+  val (p13, t13) = runSuite("core/tier1", core_tier1_test/suiteBody)
+  val passed = p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9 + p10 + p11 + p12 + p13
+  val total = t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10 + t11 + t12 + t13
   println("\n== total ==")
   println("  " ++ show(passed) ++ "/" ++ show(total) ++ " passed")
   if passed == total then ()

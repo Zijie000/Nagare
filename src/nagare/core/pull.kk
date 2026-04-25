@@ -230,3 +230,105 @@ pub fun pullUnchunks<a,e>(source : pull<chunk<a>,e>) : pull<a,e>
     PAcquire(acquire, release, tail) ->
       PAcquire(acquire, release, pullUnchunks(tail))
 
+// Drop the longest prefix while predicate holds, then emit the rest unchanged.
+// Once an element fails the predicate, every subsequent element is forwarded.
+pub fun pullDropWhile<a,e>(source : pull<a,e>, pred : a -> bool) : pull<a,e>
+  match source
+    PDone ->
+      PDone
+    POutput(out, tail) ->
+      match out
+        Chunk(values) ->
+          val rest = listDropWhile(values, pred)
+          match rest
+            [] -> pullDropWhile(tail, pred)
+            _  -> POutput(Chunk(rest), tail)
+    PEval(next) ->
+      PEval(fn() pullDropWhile(next(), pred))
+    PAcquire(acquire, release, tail) ->
+      PAcquire(acquire, release, pullDropWhile(tail, pred))
+
+// Map a chunk through a stateful step, threading the accumulator and emitting
+// the post-step accumulator for each input value. Returns (new chunk, new acc).
+fun chunkScan<a,b>(values : list<a>, acc : b, step : (b, a) -> b) : (list<b>, b)
+  chunkScanGo(values, acc, step, [])
+
+fun chunkScanGo<a,b>(rest : list<a>, cur : b, step : (b, a) -> b, outRev : list<b>) : (list<b>, b)
+  match rest
+    []            -> (listReverse(outRev), cur)
+    Cons(x, xt)   ->
+      val next = step(cur, x)
+      chunkScanGo(xt, next, step, Cons(next, outRev))
+
+// scan: emits init, then init `step` x1, then (init `step` x1) `step` x2, ...
+// The seed is emitted first, before any input is consumed.
+pub fun pullScan<a,b,e>(source : pull<a,e>, init : b, step : (b, a) -> b) : pull<b,e>
+  POutput(Chunk([init]), pullScanGo(source, init, step))
+
+fun pullScanGo<a,b,e>(source : pull<a,e>, acc : b, step : (b, a) -> b) : pull<b,e>
+  match source
+    PDone ->
+      PDone
+    POutput(out, tail) ->
+      match out
+        Chunk(values) ->
+          val (outs, nextAcc) = chunkScan(values, acc, step)
+          match outs
+            [] -> pullScanGo(tail, nextAcc, step)
+            _  -> POutput(Chunk(outs), pullScanGo(tail, nextAcc, step))
+    PEval(next) ->
+      PEval(fn() pullScanGo(next(), acc, step))
+    PAcquire(acquire, release, tail) ->
+      PAcquire(acquire, release, pullScanGo(tail, acc, step))
+
+// Step a pull until it produces the next value or terminates. Returns
+// `Just2(value, remainingPull)` or `Nothing2` at end-of-stream. Finalizers
+// from `PAcquire` nodes encountered while stepping are returned as a list
+// (LIFO order) so the caller can install them on its outer scope.
+fun unconsPull<a,e>(source : pull<a,e>, fins : list<() -> e ()>) : e maybe2<(a, pull<a,e>), list<() -> e ()>>
+  match source
+    PDone ->
+      Nothing2
+    POutput(out, tail) ->
+      match out
+        Chunk(values) ->
+          match values
+            [] -> unconsPull(tail, fins)
+            Cons(x, xt) ->
+              match xt
+                [] -> Just2((x, tail), fins)
+                _  -> Just2((x, POutput(Chunk(xt), tail)), fins)
+    PEval(next) ->
+      unconsPull(next(), fins)
+    PAcquire(acquire, release, tail) ->
+      acquire()
+      unconsPull(tail, Cons(release, fins))
+
+// Re-attach a list of finalizers (already in LIFO order) to a pull, so they
+// will be released by the interpreter's outer `withRuntime` bracket.
+fun reattachFinalizers<a,e>(fins : list<() -> e ()>, tail : pull<a,e>) : pull<a,e>
+  match fins
+    []            -> tail
+    Cons(f, ft)   -> reattachFinalizers(ft, PAcquire(fn() (), f, tail))
+
+// Combine two pulls element-wise with `f`. Stops as soon as either side
+// terminates. Stepping each side is effectful, so the result pull defers
+// every combine through `PEval`. Carries `div` because the recursion is not
+// structurally decreasing — each combine step produces a new `PEval` thunk
+// whose body recursively calls back into `pullZipWith`.
+pub fun pullZipWith<a,b,c,e>(left : pull<a,<div|e>>, right : pull<b,<div|e>>, f : (a, b) -> c) : div pull<c,<div|e>>
+  PEval(fn() pullZipWithStep(left, right, f))
+
+fun pullZipWithStep<a,b,c,e>(left : pull<a,<div|e>>, right : pull<b,<div|e>>, f : (a, b) -> c) : <div|e> pull<c,<div|e>>
+  match unconsPull(left, [])
+    Nothing2 ->
+      PDone
+    Just2((x, leftTail), leftFins) ->
+      match unconsPull(right, [])
+        Nothing2 ->
+          reattachFinalizers(leftFins, PDone)
+        Just2((y, rightTail), rightFins) ->
+          val combined = listAppend(rightFins, leftFins)
+          reattachFinalizers(combined,
+            POutput(Chunk([f(x, y)]), pullZipWith(leftTail, rightTail, f)))
+
