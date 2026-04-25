@@ -53,10 +53,6 @@ The test suite (`tests/run_all.kk`) maps directly onto the four design claims.
 
 `koka -e --builddir=.koka -isrc examples/file_pipeline.kk`
 
-**Image directory pipeline** — batch-level streaming over a folder of pictures: each file is decoded all-at-once, but only one image lives in memory at a time:
-
-`koka -e --builddir=.koka -isrc examples/image_pipeline.kk`
-
 ### Installing Koka
 
 You need the [Koka](https://koka-lang.github.io/koka/) compiler. Official **binary installers** cover **Windows (x64)**, **macOS (x64 and Apple Silicon)**, and **Linux (x64)**; see **Section 1.1 — Installing the compiler** in the [Koka language book](https://koka-lang.github.io/koka/doc/book.html).
