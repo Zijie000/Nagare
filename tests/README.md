@@ -5,43 +5,42 @@ dependencies — uses a tiny custom harness ([test_harness.kk](test_harness.kk))
 
 ## Layout
 
-- [test_harness.kk](test_harness.kk) — `check*` assertions and `runSuite`
-- [core_pull_test.kk](core_pull_test.kk) — low-level `pull` combinators
-- [core_stream_test.kk](core_stream_test.kk) — user-facing `stream` API
-- [core_interpreter_test.kk](core_interpreter_test.kk) — sinks, `compile`, finalizer LIFO
-- [core_resource_test.kk](core_resource_test.kk) — early-stop finalizer release (`take`, `takeWhile`, nested `flatMap+take`)
-- [core_infinite_test.kk](core_infinite_test.kk) — infinite streams (`cycle`, `iterate`, `repeat`)
-- [effect_polymorphism_test.kk](effect_polymorphism_test.kk) — **type-level only**: row parameter surfaces correctly in API signatures
-- [effect_e2e_test.kk](effect_e2e_test.kk) — end-to-end row-polymorphism discharge through a handler
-- [state_exn_test.kk](state_exn_test.kk) — combined `state` + `exn` effect handling
-- [io_file_write_test.kk](io_file_write_test.kk) — file write capability
-- [io_file_streaming_test.kk](io_file_streaming_test.kk) — file read streaming
-- [io_file_bytes_test.kk](io_file_bytes_test.kk) — binary byte-stream file I/O
-- [io_capability_split_test.kk](io_capability_split_test.kk) — split read/write/filesystem capabilities
-- [run_all.kk](run_all.kk) — aggregate entry point
+| File | What it covers | Tests |
+|---|---|---|
+| [test_harness.kk](test_harness.kk) | `check*` assertions and `runSuite` | — |
+| [core_pull_test.kk](core_pull_test.kk) | Low-level `pull` IR combinators (`pullAppend`, `pullMap`, `pullFilter`, `pullFlatMap`, `pullTake`, `pullDrop`, `pullTakeWhile`, `pullChunkN`, `pullUnchunks`) | 22 |
+| [core_stream_test.kk](core_stream_test.kk) | User-facing `stream` API: sources, `map`/`filter`/`flatMap`/`take`/`drop`/`takeWhile`/`dropWhile`, `scan`, `zip`/`zipWith`, `exec`, `chunkN`/`unchunks`, `streamOf` DSL | 44 |
+| [core_interpreter_test.kk](core_interpreter_test.kk) | Sinks (`toList`, `drain`, `fold`, `last`), `compile` scope, `mapResult`, finalizer LIFO ordering via `managed` | 8 |
+| [core_resource_test.kk](core_resource_test.kk) | Early-stop finalizer release: `take`, `takeWhile`, and nested `flatMap+take` with `managed` streams | 9 |
+| [core_infinite_test.kk](core_infinite_test.kk) | Infinite/unbounded sources: `iterate`, `repeat`, `repeatEval`; lazy termination with `take`/`takeWhile`; `zipWith` with one or both sides infinite | 16 |
+| [effect_e2e_test.kk](effect_e2e_test.kk) | Row polymorphism (type-level: `pureTransform`, `polymorphicPipe`, `polymorphicSource`) and end-to-end user-effect discharge: `logger` effect flowing through `eval`, `evalMap`, `flatMap`, discharged by a handler installed outside `compile` | 10 |
+| [state_exn_test.kk](state_exn_test.kk) | Combined `state` + `exn` effect row: values, counter state, exception abort, and handler-order independence | 6 |
+| [io_file_test.kk](io_file_test.kk) | File I/O with mock handlers: `readAllStreaming` (normal + early-stop resource safety), `writeAll` (normal + nested `PAcquire` LIFO), `readAllStreamingBytes`, `writeAllBytes`, `decodeUtf8` | 19 |
+| [io_capability_split_test.kk](io_capability_split_test.kk) | `fileRead` / `fileWrite` / `fileSystem` as separate capabilities; narrow pipelines that only require one capability type-check under the minimal row | 4 |
+| [run_all.kk](run_all.kk) | Aggregate entry point; exits non-zero on any failure | — |
 
-## Coverage gaps (honest disclosure)
+**Total: 138 tests across 9 suites.**
 
-- **Exception-path finalizer release.** Not covered. The sink interface is bound
-  to the `io` row, and Koka's `io` alias does not include `exn`. Widening sink
-  to `<io,exn|e>` is follow-up work.
-- **Runtime discharge of user-defined effects.** The type-level suite confirms
-  row polymorphism is expressible in signatures, but does *not* exercise a
-  handler that intercepts a user effect before the sink runs. Same root cause:
-  `compile`/sink is pinned to `io`.
+## Coverage gaps
+
+- **Exception-path finalizer release.** Not tested. The sink is pinned to the
+  `io` row; a stream that raises mid-pipeline has its finalizers run by
+  `withRuntime`'s `finally`, but there is no suite asserting this specifically.
+- **Error handling combinators.** `handleErrorWith`, `attempt`, and `rethrow`
+  are not yet implemented — no pull-IR error node exists.
 
 ## Run
 
 All suites:
 
 ```sh
-koka -e --builddir=.koka -isrc -itests tests/run_all.kk
+koka -e --builddir=.koka -isrc tests/run_all.kk
 ```
 
 A single suite:
 
 ```sh
-koka -e --builddir=.koka -isrc -itests tests/core_pull_test.kk
+koka -e --builddir=.koka -isrc tests/core_pull_test.kk
 ```
 
-Any failure causes a non-zero exit code via `throw`.
+Any failure exits non-zero via `throw`.

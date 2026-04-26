@@ -1,18 +1,40 @@
 module effect_e2e_test
 
-// End-to-end test: verifies that a user-defined effect (`logger`) can flow
-// through stream combinators and be discharged by an *external* handler
-// before the sink runs — the runtime payoff of row-polymorphic sink<a,b,e>.
+// End-to-end tests for row-polymorphic effects.
 //
-// Prior architecture (sink<a,b> = nstream<a,io> -> io b) made this impossible:
-// a `<logger|io>` source could not cross combinator boundaries into a sink.
-// The widened signature (sink<a,b,e> = nstream<a,<io|e>> -> <io|e> b) removes
-// that barrier. This suite is the proof.
+// Covers two properties:
+//
+//   1. Row polymorphism (type-level): pure combinators carry a free effect row
+//      `e` in their signatures — they don't hard-code `io`.  The helper
+//      functions `pureTransform`, `polymorphicPipe`, and `polymorphicSource`
+//      below only type-check if every combinator they use is row-polymorphic.
+//
+//   2. Effect flow (runtime): a user-defined effect (`logger`) introduced
+//      inside stream combinators (eval, evalMap, flatMap) can be discharged by
+//      a handler installed *outside* compile/run, crossing the sink boundary.
+//      This is the runtime payoff of `sink<a,b,e> = nstream<a,<io|e>> -> <io|e> b`.
 
 import nagare/core/types
 import nagare/core/stream
 import nagare/core/interpreter
 import test_harness
+
+// ---------------------------------------------------------------------------
+// Row polymorphism helpers (type-level checks)
+// ---------------------------------------------------------------------------
+
+// Pure-transform stream parameterised only by `e`. Type-checks only because
+// map and filter are row-polymorphic.
+fun pureTransform<e>(xs : list<int>) : nstream<int,e>
+  emits(xs).map(fn(x) x * 2).filter(fn(x) x > 2)
+
+// Row-polymorphic pipe. If any combinator hard-coded `io` this would fail.
+fun polymorphicPipe<e>() : pipe<int, int, e>
+  fn(source) source.map(fn(x) x + 1).filter(fn(x) x > 0).take(5)
+
+// Row-polymorphic source.
+fun polymorphicSource<e>(xs : list<int>) : nstream<int, e>
+  emits(xs)
 
 // ---------------------------------------------------------------------------
 // User-defined effect: logger
@@ -53,6 +75,20 @@ fun loggedDouble<e>() : pipe<int, int, <logger|e>>
     )
 
 pub fun suiteBody() : <test-ctx,io> ()
+  // ---- row polymorphism (type-level) --------------------------------------
+
+  checkIntListEq("pure combinators run at io",
+    [4, 6],
+    pureTransform([1, 2, 3]).compile.toList())
+
+  checkIntListEq("row-polymorphic pipe instantiated at io",
+    [2, 3, 4, 5, 6],
+    emits([1, 2, 3, 4, 5, 6, 7]).through(polymorphicPipe()).compile.toList())
+
+  checkIntListEq("row-polymorphic source instantiated at io",
+    [10, 20, 30],
+    polymorphicSource([10, 20, 30]).compile.toList())
+
   // ---- (1) User effect flows through eval and is discharged externally ----
   // The logger effect is introduced inside `eval` thunks in the source.
   // The handler is installed *outside* compile/run — verifying that the effect

@@ -59,6 +59,54 @@ pub fun suiteBody() : <test-ctx,io> ()
   val xs = pretend-no-div(fn() iterate(0, fn(x) x + 1).take(100).compile.toList())
   checkIntEq("iterate+take(100): length is exactly 100", 100, xs.length)
 
+  // ---- repeat -------------------------------------------------------------
+  // repeat tiles a finite stream; termination is guaranteed only when
+  // bounded by take/takeWhile, so these all live here beside `iterate`.
+
+  checkIntListEq("repeat: tiles a finite stream",
+    [1, 2, 3, 1, 2, 3, 1],
+    pretend-no-div(fn() emits([1, 2, 3]).repeat().take(7).compile.toList()))
+
+  checkIntListEq("repeat: singleton becomes constant stream",
+    [7, 7, 7, 7, 7],
+    pretend-no-div(fn() emit(7).repeat().take(5).compile.toList()))
+
+  checkIntListEq("repeat + take(0): terminates without forcing the source",
+    [],
+    pretend-no-div(fn() emits([1, 2, 3]).repeat().take(0).compile.toList()))
+
+  // ---- repeatEval ---------------------------------------------------------
+
+  // Each pull invokes the thunk; thread a ref to observe call count.
+  val r1 = ref(0)
+  val re1 = pretend-no-div(fn() repeatEval(fn()
+    r1 := !r1 + 1
+    !r1
+  ).take(4).compile.toList())
+  checkIntListEq("repeatEval: thunk runs once per pulled value", [1, 2, 3, 4], re1)
+  checkIntEq("repeatEval: ref incremented exactly 4 times", 4, !r1)
+
+  // Laziness: take(0) must not run the thunk at all.
+  val r2 = ref(0)
+  val re2 = pretend-no-div(fn() repeatEval(fn()
+    r2 := !r2 + 1
+    !r2
+  ).take(0).compile.toList())
+  checkIntListEq("repeatEval + take(0): emits nothing", [], re2)
+  checkIntEq("repeatEval + take(0): thunk never ran", 0, !r2)
+
+  // ---- zipWith with infinite sources --------------------------------------
+
+  // Finite side controls the length when paired with an infinite source.
+  checkIntListEq("zipWith: finite left bounds infinite right",
+    [10, 21, 32, 43, 54],
+    pretend-no-div(fn() zipWith(emits([10, 20, 30, 40, 50]), iterate(0, fn(x) x + 1), fn(a, b) a + b).compile.toList()))
+
+  // Both sides infinite; external take controls termination.
+  checkIntListEq("zipWith: both infinite, bounded by take",
+    [0, 11, 22, 33, 44],
+    pretend-no-div(fn() zipWith(iterate(0, fn(x) x + 1), iterate(0, fn(x) x + 10), fn(a, b) a + b).take(5).compile.toList()))
+
 pub fun main() : io ()
   val (passed, total) = runSuite("core/infinite", suiteBody)
   if passed == total then ()

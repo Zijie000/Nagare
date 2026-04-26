@@ -20,15 +20,15 @@ FS2 encodes effects through a type parameter `F[_]` and relies on Cats Effect’
 
 ## Test coverage
 
-The test suite (`tests/run_all.kk`) maps directly onto the four design claims.
+The test suite (`tests/run_all.kk`) maps directly onto the four design claims. 138 tests across 9 suites.
 
-**Compositional.** `effect_polymorphism_test` confirms at the type level that combinators like `map`, `filter`, `take`, and `flatMap` are row-polymorphic — a pipeline typed at an arbitrary row `e` type-checks only if no combinator hard-codes a specific effect. `effect_e2e_test` then exercises this at runtime: a user-defined `logger` effect crosses `eval`, `evalMap`, and `flatMap` boundaries and is discharged by a handler installed *outside* the sink.
+**Compositional.** `effect_e2e_test` verifies row polymorphism at both the type level and at runtime. Type-level: helper functions `pureTransform`, `polymorphicPipe`, and `polymorphicSource` are parameterised over an arbitrary row `e` — they only type-check if every combinator they use is row-polymorphic. Runtime: a user-defined `logger` effect crosses `eval`, `evalMap`, and `flatMap` boundaries and is discharged by a handler installed *outside* the sink.
 
 **Effectful.** `effect_e2e_test` and `state_exn_test` demonstrate that multiple user-defined effects (`logger`, `counter`, `parseExn`) thread through the same pipeline simultaneously, that handlers may be installed in any order without interference, and that an exception raised mid-stream aborts the pipeline while preserving state accumulated up to the abort point.
 
-**Streaming (lazy, pull-based).** `core_infinite_test` adds an `iterate` combinator — an unbounded source typed `nstream<a, <div|e>>` — and verifies that `take(n)`, `takeWhile`, `map`, and `filter` all terminate on it. Termination *is* the test: any eager evaluation or failure to propagate the stop signal into the `PEval` thunk would cause the suite to diverge. `io_file_streaming_test` covers the same property on `readAllStreaming`: `take(1)` on a multi-chunk mock file returns only the first chunk and still closes the handle.
+**Streaming (lazy, pull-based).** `core_infinite_test` verifies that unbounded sources terminate correctly under downstream early-stop combinators. It covers `iterate`, `repeat`, and `repeatEval` (all typed `nstream<a, <div|e>>`), and checks that `take(n)`, `takeWhile`, `map`, and `filter` all terminate on them — termination is the test. It also exercises `zipWith` with one or both sides infinite, bounded externally by `take`. `io_file_test` covers the same laziness property on `readAllStreaming`: `take(1)` on a multi-chunk mock file returns only the first chunk and still closes the handle.
 
-**Resource-safe.** `core_resource_test` uses `managed` streams with acquire/release callbacks logged to a ref. It asserts that `take` and `takeWhile` trigger the finalizer on early termination, and that nested resources opened inside `flatMap` are all released — every acquire has a matching release. `io_file_streaming_test` independently checks that the file handle is closed even when the consumer stops early.
+**Resource-safe.** `core_resource_test` uses `managed` streams with acquire/release callbacks logged to a ref. It asserts that `take` and `takeWhile` trigger the finalizer on early termination, and that nested resources opened inside `flatMap` are all released — every acquire has a matching release. `io_file_test` independently checks that the file handle is closed even when the consumer stops early, and that nested `PAcquire` nodes are released in LIFO order.
 
 ## Quick start 🐣
 
